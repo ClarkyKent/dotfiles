@@ -1,0 +1,6 @@
+ls ./.config/
+exit
+ls
+wezterm connect my.server
+wezterm
+exit
