@@ -1,0 +1,16 @@
+cd ..
+cd /workspaces/quara-firmware/
+nvim
+exit
+cd /workspaces/quara-firmware/
+just build
+clear
+nvim
+zsh
+nvim
+exit
+sh
+exit
+nu
+exit
+nvim
