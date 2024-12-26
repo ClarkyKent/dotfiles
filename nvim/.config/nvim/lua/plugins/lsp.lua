@@ -1,8 +1,42 @@
+
+local on_attach = require("util.lsp").on_attach
+local diagnostic_signs = require("util.icons").diagnostic_signs
+
+
+local config = function()
+	require("neoconf").setup({})
+	local lsp = require("blink.cmp")
+	local lspconfig = require("lspconfig")
+	local capabilities = lsp.get_lsp_capabilities()
+-- lua
+	lspconfig.lua_ls.setup({
+		capabilities = capabilities,
+		on_attach = on_attach,
+		settings = { -- custom settings for lua
+			Lua = {
+				-- make the language server recognize "vim" global
+				diagnostics = {
+					globals = { "vim" },
+				},
+				workspace = {
+					library = {
+						vim.fn.expand("$VIMRUNTIME/lua"),
+						vim.fn.expand("$XDG_CONFIG_HOME") .. "/nvim/lua",
+					},
+				},
+			},
+		},
+	})
+end
+
 return {
-  {
+  
     "neovim/nvim-lspconfig",
     dependencies = {
-      'saghen/blink.cmp',
+    "windwp/nvim-autopairs",
+		"creativenull/efmls-configs-nvim",
+		"hrsh7th/cmp-buffer",
+    "saghen/blink.cmp",
       {
         "folke/lazydev.nvim",
         opts = {
@@ -12,31 +46,6 @@ return {
         },
       },
     },
-    config = function()
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
-      local servers = require("plugins.lsp.servers")
-      for server, opts in pairs(servers) do
-        opts.capabilities = capabilities
-        require("lspconfig")[server].setup(opts)
-      end
- 
-
-      vim.api.nvim_create_autocmd('LspAttach', {
-        callback = function(args)
-          local c = vim.lsp.get_client_by_id(args.data.client_id)
-          if not c then return end
-
-          if vim.bo.filetype == "lua" then
-            -- Format the current buffer on save
-            vim.api.nvim_create_autocmd('BufWritePre', {
-              buffer = args.buf,
-              callback = function()
-                vim.lsp.buf.format({ bufnr = args.buf, id = c.id })
-              end,
-            })
-          end
-        end,
-      })
-    end,
-  }
+  config = config,
+  
 }
