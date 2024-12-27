@@ -1,5 +1,13 @@
 local mapkey = require("util.keymapper").mapvimkey
 
+local function map(mode, lhs, rhs, opts)
+    opts = opts or {}
+    opts.silent = opts.silent ~= false
+    vim.keymap.set(mode, lhs, rhs, opts)
+end
+local opts = { noremap = true, silent = true }
+
+
 mapkey("-", "Oil", "n") -- open oil explorer
 -- Buffer Navigation
 mapkey("<leader>bn", "bnext", "n") -- Next buffer
@@ -37,12 +45,32 @@ mapkey("<C-Right>", "vertical resize -2", "n")
 mapkey("<leader>pa", "ShowPath", "n") -- Show Full File Path
 
 -- Indenting
-vim.keymap.set("v", "<", "<gv", { silent = true, noremap = true })
-vim.keymap.set("v", ">", ">gv", { silent = true, noremap = true })
+map("v", "<", "<gv", opts)
+map("v", ">", ">gv", opts)
+
+-- Visual overwrite paste
+map({ 'v', 'x' }, 'p', '"_dP', opts)
+
+-- Do not copy on x
+map({ 'v', 'x' }, 'x', '"_x', opts)
+
+
+-- Move to line beginning and end
+map({ 'n', 'v', 'x' }, 'gl', '$', { desc = 'End of line' })
+map({ 'n', 'v', 'x' }, 'gh', '^', { desc = 'Beginning of line' })
+
+-- Better up/down
+map('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+map('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+
+-- Move text up and down
+map({ 'v', 'x' }, 'J', ":move '>+1<CR>gv-gv", opts)
+map({ 'v', 'x' }, 'K', ":move '<-2<CR>gv-gv", opts)
+
 
 local api = vim.api
 
--- Comments
+-- Comment
 
 if vim.env.TMUX ~= nil then
 	api.nvim_set_keymap("n", "<C-_>", "gtc", { noremap = false })
