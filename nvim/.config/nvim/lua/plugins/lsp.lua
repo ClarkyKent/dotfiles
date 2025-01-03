@@ -58,6 +58,7 @@ local config = function()
       completion = true,
     },
     settings = {
+      rootMarkers = {".git/"},
       languages = {
         lua = { luacheck, stylua },
         python = { ruff, ruff_sort, rufflint },
