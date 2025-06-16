@@ -4,18 +4,10 @@ return {
     ---@module 'oil'
     ---@type oil.SetupOpts
     opts = {
-      -- Buffer-local options to use for oil buffers
-      buf_options = {
-        buflisted = false,
-        bufhidden = "hide",
-      },
     },
     -- Optional dependencies
     dependencies = { { "echasnovski/mini.icons", opts = {} } },
-    -- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if prefer nvim-web-devicons
-    keys = {
-      { "-", "<CMD>Oil<CR>", desc = "Open parent directory" },
-    },
+    lazy = false,
     view_options = {
       -- Show files and directories that start with "."
       show_hidden = false,

@@ -1,44 +1,46 @@
-local config = function()
-  require("nvim-treesitter.configs").setup({
-    build = ":TSUpdate",
-    indent = {
-      enable = true,
-    },
-    autotag = {
-      enable = true,
-    },
-    event = {
-      "BufReadPre",
-      "BufNewFile",
-    },
-    ensure_installed = {
-      "vim",
-      "regex",
-      "rust",
-      "markdown",
-      "json",
-      "yaml",
-      "bash",
-      "lua",
-      "dockerfile",
-      "gitignore",
-      "python",
-      "toml",
-      "c",
-      "cpp",
-      "rust",
-      "just",
-    },
-    auto_install = true,
-    highlight = {
-      enable = true,
-      additional_vim_regex_highlighting = true,
-    },
-  })
-end
-
 return {
-  "nvim-treesitter/nvim-treesitter",
-  lazy = false,
-  config = config,
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    config = function ()
+        local configs = require("nvim-treesitter.configs")
+
+        configs.setup({
+            ensure_installed = {
+                "vim",
+                "regex",
+                "rust",
+                "markdown",
+                "json",
+                "yaml",
+                "bash",
+                "lua",
+                "dockerfile",
+                "gitignore",
+                "python",
+                "toml",
+                "c",
+                "cpp",
+                "rust",
+                "just",
+            },
+            auto_install = true,
+            sync_install = false,
+            highlight = { enable = true, additional_vim_regex_highlighting = true, },
+            indent =  { enable = true },
+            autotag = { enable = true },
+            event = {
+                "BufReadPre",
+                "BufNewFile",
+            },
+            incremental_selection = {
+                enable = true,
+                keymaps = {
+                    init_selection = "<Enter>", -- set to `false` to disable one of the mappings
+                    node_incremental = "<Enter>",
+                    scope_incremental = false,
+                    node_decremental = "<Backspace>",
+                },
+            },
+        })
+    end
 }
