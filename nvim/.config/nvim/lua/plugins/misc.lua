@@ -17,12 +17,54 @@ return {
     },
   },
 },
+
+-- Autopairs
 {
-    "tpope/vim-sleuth"
+  "windwp/nvim-autopairs",
+  event = "InsertEnter",
+  opts = {},
 },
 
+-- comment
 {
-    lazy = false,
-	"tpope/vim-fugitive",
+  "numToStr/Comment.nvim",
+  event = "VeryLazy",
+  opts = {
+    mappings = {
+      basic = true,
+      extra = true,
+      extended = false,
+    },
+  },
+
+   {
+  "folke/todo-comments.nvim",
+  dependencies = { "nvim-lua/plenary.nvim" },
+  opts = {
+    -- Default configuration. See
+    -- https://github.com/folke/todo-comments.nvim#%EF%B8%8F-configuration for
+    -- details
+  },
+},
+ {
+  -- Vim plugin no further initialization needed
+  "mbbill/undotree",
+  lazy = false,
+},
+  {
+  {
+    "echasnovski/mini.ai",
+    opts = {},
+  },
+  {
+    "echasnovski/mini.bracketed",
+    opts = {},
+  },
+},
+
+ {
+	"tpope/vim-sleuth",
+	-- No further initialization needed, as this is a real "vim" not a lua
+	-- plugin.
 },
 }

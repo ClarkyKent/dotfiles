@@ -32,7 +32,7 @@ return {
             },
             auto_install = true,
             sync_install = false,
-            highlight = { enable = true, additional_vim_regex_highlighting = true, },
+            highlight = { enable = true, additional_vim_regex_highlighting = { "ruby" }, },
             indent =  { enable = true },
             autotag = { enable = true },
             event = {
@@ -42,11 +42,11 @@ return {
             incremental_selection = {
                 enable = true,
                 keymaps = {
-                    init_selection = "<Enter>", -- set to `false` to disable one of the mappings
-                    node_incremental = "<Enter>",
-                    scope_incremental = false,
-                    node_decremental = "<Backspace>",
-                },
+        init_selection = "<CR>",
+        scope_incremental = "<CR>",
+        node_incremental = "<TAB>",
+        node_decremental = "<S-TAB>",
+      },
             },
         })
     end
