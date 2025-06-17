@@ -3,7 +3,7 @@ return {
   event = "VeryLazy",
   ---@type Flash.Config
   config = function()
-    local U = require("mrjakob.util")
+    local U = require("core.snippets")
     U.newColorWithBase("FlashLabel", "Search", { bg = U.getColor("Yellow", "fg") })
     require("flash").setup({
       modes = {

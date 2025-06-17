@@ -40,5 +40,6 @@ require("lazy").setup({
 require("core.options")
 require("core.keymaps")
 require("core.autocmds")
--- require("config.helpers")
+require("core.helpers")
+require("core.snippets")
 
