@@ -36,6 +36,7 @@ return {
       extended = false,
     },
   },
+},
 
    {
   "folke/todo-comments.nvim",
