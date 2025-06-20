@@ -25,6 +25,22 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     end,
 })
 
+-- start terminal in insert mode
+vim.api.nvim_create_autocmd("TermOpen", {
+  desc = "Auto enter insert mode when opening a terminal",
+  group = augroup('custom_buffer'),
+  pattern = "*",
+  callback = function()
+    -- Wait briefly just in case we immediately switch out of the buffer (e.g. Neotest)
+    vim.defer_fn(function()
+      if vim.api.nvim_buf_get_option(0, 'buftype') == 'terminal' then
+        vim.cmd([[startinsert]])
+      end
+    end, 100)
+  end,
+})
+
+
 vim.api.nvim_create_autocmd("LspAttach", {
   group = augroup("keymaps-lsp-attach"),
   callback = function()

@@ -1,30 +1,5 @@
 return {
-    {
-  "folke/which-key.nvim",
-        event = "VeryLazy",
-  opts = {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
-  },
-  keys = {
-    {
-      "<leader>?",
-      function()
-        require("which-key").show({ global = false })
-      end,
-      desc = "Buffer Local Keymaps (which-key)",
-    },
-  },
-},
-
--- Autopairs
-{
-  "windwp/nvim-autopairs",
-  event = "InsertEnter",
-  opts = {},
-},
-
+  { 'brenoprata10/nvim-highlight-colors' },
 -- comment
 {
   "numToStr/Comment.nvim",
@@ -47,25 +22,43 @@ return {
     -- details
   },
 },
- {
-  -- Vim plugin no further initialization needed
-  "mbbill/undotree",
-  lazy = false,
-},
-  {
-  {
-    "echasnovski/mini.ai",
-    opts = {},
+{
+    "mbbill/undotree",
+    config = function()
+      vim.keymap.set("n", "<leader>u", "<cmd>Telescope undo<CR>", { desc = "Telescope Undo" })
+    end,
   },
-  {
-    "echasnovski/mini.bracketed",
-    opts = {},
-  },
-},
+
 
  {
 	"tpope/vim-sleuth",
 	-- No further initialization needed, as this is a real "vim" not a lua
 	-- plugin.
 },
+{
+    "RRethy/vim-illuminate",
+    config = function()
+      require("illuminate")
+    end,
+  },
+  {
+    "tpope/vim-fugitive",
+    config = function()
+      vim.keymap.set("n", "<leader>gs", vim.cmd.Git, { desc = "Open Fugitive Panel" })
+    end,
+  },
+  "tpope/vim-repeat",
+  {
+    "numToStr/Comment.nvim",
+    config = function()
+      require("Comment").setup()
+    end,
+  },
+  {
+    "aaronhallaert/advanced-git-search.nvim",
+    dependencies = {
+      "tpope/vim-fugitive",
+      "tpope/vim-rhubarb",
+    },
+  },
 }
