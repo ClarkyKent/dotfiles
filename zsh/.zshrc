@@ -77,6 +77,7 @@ zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 alias ls='ls --color'
 alias vim='nvim'
 alias c='clear'
+alias cat='bat'
 
 # Shell integrations
 eval "$(fzf --zsh)"
@@ -85,4 +86,5 @@ eval "$(zoxide init --cmd cd zsh)"
 eval "$(direnv hook zsh)"
 
 if [ -e /home/quara/.nix-profile/etc/profile.d/nix.sh ]; then . /home/quara/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
-export PATH="/home/linuxbrew/.linuxbrew/opt/clang-format/bin:$PATH"
+# export PATH="/home/linuxbrew/.linuxbrew/opt/clang-format/bin:$PATH"
+# export PATH="/home/quara/.cargo/bin:$PATH"

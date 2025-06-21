@@ -9,8 +9,8 @@ return { -- Autoformat
           lua = { "stylua" },
           c = { "clang-format" },
           cpp = { "clang-format" },
-          json = { { "prettierd", "prettier", stop_after_first = true } },
-          markdown = { { "prettierd", "prettier", stop_after_first = true } },
+          json =  { "prettierd", "prettier", stop_after_first = true },
+          markdown =  { "prettierd", "prettier", stop_after_first = true } ,
           erb = { "htmlbeautifier" },
           html = { "htmlbeautifier" },
           bash = { "beautysh" },
@@ -19,7 +19,7 @@ return { -- Autoformat
           yaml = { "yamlfix" },
           toml = { "taplo" },
           sh = { "shellcheck" },
-          python = { "riff_fix", "ruff_format", "ruff_organize_imports" },
+          python = { "ruff" },
         },
       })
 

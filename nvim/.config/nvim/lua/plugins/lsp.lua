@@ -206,12 +206,9 @@ return {
         "stylua", -- Used to format Lua code
         "prettierd", -- Used to format JavaScript/TypeScript code
         "clang-format", -- Used to format C/C++ code
-        "ruff_format", -- Used to format Python code
-        "riff_fix", -- Used to fix Python code
-        "ruff_organize_imports", -- Used to organize Python imports
+        "ruff", -- Used to format Python code
         "isort", -- Used to sort Python imports
         "black", -- Used to format Python code
-        "clangd_extensions", -- Used to extend clangd with additional features
         "clangd"
       })
 
