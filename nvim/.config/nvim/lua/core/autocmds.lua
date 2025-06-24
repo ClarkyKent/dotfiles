@@ -6,7 +6,7 @@ end
 vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
     group = augroup('strip_space'),
     pattern = { '*' },
-    callback = function()
+      callback = function()
         vim.cmd([[ %s/\s\+$//e ]])
     end,
 })

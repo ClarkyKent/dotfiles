@@ -232,40 +232,4 @@ return {
       })
     end,
   },
-  -- LSP Plugins
-  {
-    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
-    -- used for completion, annotations and signatures of Neovim apis
-    "folke/lazydev.nvim",
-    ft = "lua",
-    opts = {
-      library = {
-        -- Load luvit types when the `vim.uv` word is found
-        { path = "luvit-meta/library", words = { "vim%.uv" } },
-      },
-    },
-  },
-  -- Rustacean vim for all our Rust needs
-  -- INFO: We can't install rust-analyzer via Mason, as this will conflict with
-  -- rustaceanvim. Therefore ensure it is installed manually for example using
-  -- rustup and available in the path. This has the added benefit, of having
-  -- the rust-analyzer in the version fitting our current rust installation:
-  --
-  -- ```shell
-  -- rustup component add rust-analyzer
-  -- ```
-  {
-    "mrcjkb/rustaceanvim",
-    version = "^5", -- Recommended
-    lazy = false, -- This plugin is already lazy
-    config = function()
-      vim.g.rustaceanvim = {
-        tools = {
-          float_win_config = {
-            border = "rounded",
-          },
-        },
-      }
-    end,
-  },
 }

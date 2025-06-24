@@ -1,22 +1,18 @@
 return {
   "saghen/blink.cmp",
-  -- use a release tag to download pre-built binaries
-  version = "v0.14.0",
+  -- optional: provides snippets for the snippet source
+  dependencies = {  'rafamadriz/friendly-snippets' ,
+                    -- "giuxtaposition/blink-cmp-copilot",
+                  },
 
-  dependencies = {
-    "giuxtaposition/blink-cmp-copilot",
-  },
+  -- use a release tag to download pre-built binaries
+  version = '1.*',
 
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
-    keymap = {
-      preset = "default",
-      -- Map C-Z in conjunction with C-Y for completion, as we are on a QWRTZ
-      -- keyboard.
-      ["<C-Z>"] = { "accept", "fallback" },
-    },
-
+     keymap = { preset = 'default' },
+   
     appearance = {
       use_nvim_cmp_as_default = true,
       nerd_font_variant = "mono",
@@ -54,17 +50,17 @@ return {
 
     sources = {
       default = { "lsp", "path", "snippets", "buffer" },
-      providers = {
-        copilot = {
-          enabled = function()
-            return vim.g.copilot_completion_enabled
-          end,
-          name = "copilot",
-          module = "blink-cmp-copilot",
-          score_offset = 100,
-          should_show_items = true,
-        },
-      },
+      -- providers = {
+      --   copilot = {
+      --     enabled = function()
+      --       return vim.g.copilot_completion_enabled
+      --     end,
+      --     name = "copilot",
+      --     module = "blink-cmp-copilot",
+      --     score_offset = 100,
+      --     should_show_items = true,
+      --   },
+      -- },
     },
   },
 
