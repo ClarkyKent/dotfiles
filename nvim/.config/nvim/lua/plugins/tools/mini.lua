@@ -16,16 +16,5 @@ return {
     "echasnovski/mini.surround",
     opts = {},
   },
-  {
-    "echasnovski/mini.trailspace",
-    opts = {},
-  },
-  {
-    "echasnovski/mini.indentscope",
-    opts = {},
-  },
-  {
-    "echasnovski/mini.splitjoin",
-    opts = {},
-  },
+
 }
