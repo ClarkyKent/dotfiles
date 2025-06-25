@@ -19,9 +19,7 @@ return {
       harpoon:list():add()
     end, "[A]dd Harpoon")
 
-    keymap_set("n", "l", function()
-      harpoon.ui:toggle_quick_menu(harpoon:list())
-    end, "[L]ist Harpoons")
+    vim.keymap.set("n", "<C-S-L>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
 
     -- Harpoon to targets
     keymap_set("n", "q", function()
@@ -29,24 +27,19 @@ return {
     end, "[q] Harpoon to 1")
     keymap_set("n", "w", function()
       harpoon:list():select(2)
-    end, "[q] Harpoon to 2")
+    end, "[w] Harpoon to 2")
     keymap_set("n", "e", function()
       harpoon:list():select(3)
-    end, "[q] Harpoon to 3")
+    end, "[e] Harpoon to 3")
     keymap_set("n", "r", function()
       harpoon:list():select(4)
-    end, "[e] Harpoon to 4")
+    end, "[r] Harpoon to 4")
     keymap_set("n", "t", function()
       harpoon:list():select(5)
-    end, "[q] Harpoon to 5")
+    end, "[t] Harpoon to 5")
 
     -- Toggle previous & next buffers stored within Harpoon list
-    -- We map the ü instead of the [ as the langmap does not work here. No idea why.
-    keymap_set("n", "ü", function()
-      harpoon:list():prev()
-    end, "[[] Hardpoon to Previous")
-    keymap_set("n", "]", function()
-      harpoon:list():next()
-    end, "[]] Harpoon to Next")
+    vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
+    vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
   end,
 }

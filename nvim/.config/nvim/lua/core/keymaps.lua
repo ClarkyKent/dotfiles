@@ -78,7 +78,6 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 -- Buffers
 vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = "Next Buffer" })
 vim.keymap.set('n', '<S-Tab>', ':bprevious<CR>', { desc = "Prev Buffer" })
-vim.keymap.set('n', '<leader>x', ':bdelete!<CR>', { desc = "Close Buffer" }) -- close buffer
 vim.keymap.set('n', '<leader>b', '<cmd> enew <CR>', { desc = "New Buffer" }) -- new buffer
 
 
@@ -203,13 +202,6 @@ end, { desc = "Next todo comment" })
 vim.keymap.set("n", "[t", function()
   require("todo-comments").jump_prev()
 end, { desc = "Previous todo comment" })
-
--- Toggle undotree
--- FIXME: Maybe there is a faster more current way of showing this undo history?
-vim.keymap.set("n", "<leader>uu", function()
-  vim.cmd.UndotreeToggle()
-end, { remap = false, desc = "Toggle [U]ndoTree [U]i" })
-
 
 -- Visual --
 -- Stay in indent mode
