@@ -1,15 +1,23 @@
 local icons = require('utils.icons').diagnostics
+local util = require('utils.util')
+
+local auto_install = require('utils.util').get_user_config('auto_install', true)
+local installed_servers = {}
+if auto_install then
+    installed_servers = require('plugins.treesitter_parsers').lsp_servers
+end
+
+
 
 
 return {
   {
     -- Main LSP Configuration
     "neovim/nvim-lspconfig",
+     opts = {
+      inlay_hints = { enabled = true },
+    },
     dependencies = {
-      -- Automatically install LSPs and related tools to stdpath for Neovim
-
-      "williamboman/mason-lspconfig.nvim",
-
       -- Useful status updates for LSP.
       -- LSP and notify updates in the down right corner
       {
@@ -25,6 +33,11 @@ return {
       "saghen/blink.cmp",
     },
     config = function()
+
+      local blink_capabilities = require("blink.cmp").get_lsp_capabilities()
+      blink_capabilities = vim.tbl_deep_extend("force", util.capabilities, blink_capabilities)
+
+      local lspconfig = require("lspconfig")
 
 
       -- Make hover window have borders
@@ -69,167 +82,12 @@ return {
       end
       vim.diagnostic.config({ signs = { text = diagnostic_signs } })
 
-      -- LSP servers and clients are able to communicate to each other what features they support.
-      --  By default, Neovim doesn't support everything that is in the LSP specification.
-      --  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
-      --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      local blink_capabilities = require("blink.cmp").get_lsp_capabilities()
-      capabilities = vim.tbl_deep_extend("force", capabilities, blink_capabilities)
-
-      -- Enable the following language servers
-      --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
-      --
-      --  Add any additional override configuration in the following tables. Available keys are:
-      --  - cmd (table): Override the default command used to start the server
-      --  - filetypes (table): Override the default list of associated filetypes for the server
-      --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
-      --  - settings (table): Override the default settings passed when initializing the server.
-      --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-      local servers = {
-        clangd = {
-        keys = {
-          { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
-        },
-        root_dir = function(fname)
-          return require("lspconfig.util").root_pattern(
-            "Makefile",
-            "configure.ac",
-            "configure.in",
-            "config.h.in",
-            "meson.build",
-            "meson_options.txt",
-            "meson.options",
-            "build.ninja"
-          )(fname) or require("lspconfig.util").root_pattern("compile_commands.json", "compile_flags.txt")(
-            fname
-          ) or require("lspconfig.util").find_git_ancestor(fname)
-        end,
-        capabilities = {
-          offsetEncoding = { "utf-16" },
-        },
-        -- cmd = {
-        --   "clangd",
-        --   "--background-index",
-        --   "--clang-tidy",
-        --   "--header-insertion=iwyu",
-        --   "--completion-style=detailed",
-        --   "--function-arg-placeholders",
-        --   "--fallback-style=llvm",
-        -- },
-        init_options = {
-          usePlaceholders = true,
-          completeUnimported = true,
-          clangdFileStatus = true,
-        },
-      },
-        -- gopls = {},
-        pyright = {},
-        -- rust_analyzer = {},
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
-        --
-
-        lua_ls = {
-          -- cmd = { ... },
-          -- filetypes = { ... },
-          -- capabilities = {},
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = "Replace",
-              },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              diagnostics = { disable = { "missing-fields" } },
-            },
-          },
-        },
-        -- Markdown
-        marksman = {},
-        -- TypeScript, JavaScript
-        ts_ls = {},
-        -- TOML
-        taplo = {},
-        -- PHP
-        -- intelephense = {},
-        phpactor = {},
-        -- Bash/Shell
-        shellcheck = {},
-        bashls = {},
-        -- Docker
-        dockerls = {},
-        docker_compose_language_service = {},
-        -- Helm
-        helm_ls = {},
-        yamlls = {
-          -- FIXME: yamlls produces a lot of false positives for helm files
-          -- due to template syntax at the moment. It is loaded nevertheless.
-          -- Therefore we need to ensure it is not attached for those files
-          filetypes = { "yaml" },
-          on_attach = function(client, bufnr)
-            local patterns = { "*/templates/*.yaml", "*/templates/*.tpl", "values.yaml", "Chart.yaml" }
-            local fname = vim.fn.expand("%:p")
-            for _, pattern in ipairs(patterns) do
-              local lua_pattern = pattern:gsub("*", ".*"):gsub("/", "/.*")
-              if fname:match(lua_pattern) then
-                vim.lsp.buf_detach_client(bufnr, client.id)
-                return
-              end
-            end
-          end,
-        },
-        jsonls = {},
-        tailwindcss = {},
-
-        -- Rust
-        -- Handled by rustacean.vim
-        -- rust_analyzer = {},
-      }
-
-      -- Ensure the servers and tools above are installed
-      --  To check the current status of installed tools and/or manually install
-      --  other tools, you can run
-      --    :Mason
-      --
-      --  You can press `g?` for help in this menu.
-      require("mason").setup()
-
-      -- You can add other tools here that you want Mason to install
-      -- for you, so that they are available from within Neovim.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        "stylua", -- Used to format Lua code
-        "prettierd", -- Used to format JavaScript/TypeScript code
-        "clang-format", -- Used to format C/C++ code
-        "ruff", -- Used to format Python code
-        "isort", -- Used to sort Python imports
-        "black", -- Used to format Python code
-        "clangd"
-      })
-
-      require("mason-tool-installer").setup({
-        ensure_installed = ensure_installed,
-      })
-
-      require("mason-lspconfig").setup({
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-            require("lspconfig")[server_name].setup(server)
-          end,
-        },
-        ensure_installed = {},
-        automatic_installation = true,
-      })
+       for _, server in ipairs(installed_servers) do
+        lspconfig[server].setup({
+          on_attach = util.on_attach,
+          capabilities = blink_capabilities,
+        })
+      end
     end,
   },
 }

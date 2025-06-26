@@ -1,12 +1,40 @@
+local auto_install = require('utils.util').get_user_config('auto_install', true)
+local installed_servers = {}
+if auto_install then
+    installed_servers = require('plugins.treesitter_parsers').lsp_servers
+end
+
+-- LSP servers and clients are able to communicate to each other what features they support.
+--  By default, Neovim doesn't support everything that is in the LSP specification.
+--  When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
+--  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+local blink_capabilities = require("blink.cmp").get_lsp_capabilities()
+capabilities = vim.tbl_deep_extend("force", capabilities, blink_capabilities)
+
+
+
 return {
 	"williamboman/mason.nvim",
-	event = { "BufReadPre", "BufNewFile" },
-	dependencies = {
-		"WhoIsSethDaniel/mason-tool-installer.nvim",
-	},
+	 dependencies = {
+      "williamboman/mason-lspconfig.nvim",
+    },
 	config = function()
-		-- mason
-		require("mason").setup({
+		local mason = require("mason")
+      	local mason_lspconfig = require("mason-lspconfig")
+		local lspconfig = require("lspconfig")
+		
+		local default_setup = function(server)
+			lspconfig[server].setup({
+				capabilities = capabilities,
+			})
+		end
+
+		mason.setup()
+		mason_lspconfig.setup({
+			ensure_installed = installed_servers, -- will be installed by mason
+			automatic_installation = false,
+			handlers = { default_setup },
 			ui = {
 				icons = {
 					package_installed = "✓",
@@ -17,38 +45,6 @@ return {
 				width = 0.8,
 				height = 0.8,
 			},
-		})
-		-- mason tools intaller
-		require("mason-tool-installer").setup({
-			ensure_installed = {
-				-- you can turn off/on auto_update per tool
-				{ "bash-language-server" },
-				{ "lua-language-server" },
-				{ "vim-language-server" },
-				{ "stylua" },
-				{ "editorconfig-checker" },
-				{ "html-lsp" },
-				{ "pyright" },
-				{ "black" },
-				{ "autopep8" },
-				{ "json-lsp" },
-				{ "prettier" },
-				{ "ruff" },
-        { "yaml-language-server" },
-        { "dockerfile-language-server" },
-        { "docker-compose-language-service" },
-        { "bash-debug-adapter" },
-        { "debugpy" },
-        { "rust-analyzer" }, -- Rust
-				{ "eslint-lsp" },
-				{ "codelldb" },
-				{ "clangd" },
-				{ "clang-format" },
-			},
-			auto_update = true,
-			run_on_start = true,
-			start_delay = 3000, -- 3 second delay
-			debounce_hours = 5, -- at least 5 hours between attempts to install/update
 		})
 	end,
 }

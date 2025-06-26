@@ -23,9 +23,21 @@ local treesitter_parsers = {
 
 local lsp_servers = {
     'bashls',
-    'jsonls',
-    'typos_lsp',
+    'lua_ls',
     'vimls',
+    'cmake',
+    'stylua',
+    'black',
+    'json-lsp',
+    'prettier',
+    'ruff',
+    'yaml-language-server',
+    'dockerfile-language-server',
+    'docker-compose-language-service',
+    'rust_analyzer', -- Rust
+    'robotframework_ls',
+    'clangd',
+    'clang-format',
 }
 
 -- if util.is_present('npm') then

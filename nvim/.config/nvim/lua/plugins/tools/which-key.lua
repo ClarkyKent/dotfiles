@@ -23,7 +23,7 @@ return { -- Useful plugin to show you pending keybinds.
       { "<leader>f", group = "[F]ind" },
       { "<leader>w", group = "[W]orkspace" },
       { "<leader>u", group = "[U]i" },
-      { "<leader>h", group = "Git [H]unk", mode = { "n", "v" } },
+      { "<leader>g", group = "[G]it", mode = { "n", "v" } },
     },
   },
 }

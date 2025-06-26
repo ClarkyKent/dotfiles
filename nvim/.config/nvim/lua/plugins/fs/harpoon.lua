@@ -10,7 +10,7 @@ return {
 
     -- We may want to change the "harpoon" leader to something different than
     -- the leader key
-    local our_leader = "<leader>"
+    local our_leader = "<leader>h"
     local function keymap_set(mode, key, fn, desc)
       vim.keymap.set(mode, our_leader .. key, fn, { desc = desc })
     end
@@ -19,7 +19,9 @@ return {
       harpoon:list():add()
     end, "[A]dd Harpoon")
 
-    vim.keymap.set("n", "<C-L>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+    keymap_set("n", "l", function() 
+      harpoon.ui:toggle_quick_menu(harpoon:list())
+    end, "[l] Harpoon to 1")
 
     -- Harpoon to targets
     keymap_set("n", "q", function()
