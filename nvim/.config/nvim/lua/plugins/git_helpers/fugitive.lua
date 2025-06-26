@@ -35,7 +35,7 @@ return {
       vim.keymap.set("n", "<leader>gbb", ":G blame<CR>", { desc = "Git blame" })
 
       -- Switch and toggle branch
-      vim.keymap.set("n", "<leader>gtr", ":G switch - ", { desc = "Git switch to last checkout branch" })
-      vim.keymap.set("n", "<leader>gsd", ":G switch develop ", { desc = "Git switch to develop" })
+      vim.keymap.set("n", "<leader>gtr", ":G switch - <CR>", { desc = "Git switch to last checkout branch" })
+      vim.keymap.set("n", "<leader>gcd", ":G switch develop <CR>", { desc = "[G]it [c]hange to [d]evelop" })
     end,
 }

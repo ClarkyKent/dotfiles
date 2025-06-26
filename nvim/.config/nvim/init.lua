@@ -17,7 +17,8 @@ vim.g.maplocalleader = " "
 require("lazy").setup({
 	spec = {
 		-- import your plugins
-		{ import = "plugins.helpers" },
+		{ import = "plugins.editor" },
+		{ import = "plugins.fs" },
 		{ import = "plugins.ui" },
 		{ import = "plugins.git_helpers" },
 		{ import = "plugins.lsp" },
@@ -48,7 +49,7 @@ require("core.helpers")
 require("core.snippets")
 require("core.options")
 
-vim.cmd("colorscheme tokyonight")
+vim.cmd("colorscheme gruvbox")
 vim.cmd('hi IlluminatedWordText guibg=none gui=underline')
 vim.cmd('hi IlluminatedWordRead guibg=none gui=underline')
 vim.cmd('hi IlluminatedWordWrite guibg=none gui=underline')

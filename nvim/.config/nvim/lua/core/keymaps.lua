@@ -1,104 +1,97 @@
-local function map(mode, lhs, rhs, opts)
-  opts = opts or {}
-  opts.silent = opts.silent ~= false
-  vim.keymap.set(mode, lhs, rhs, opts)
-end
-
--- For conciseness
-local opts = { noremap = true, silent = true }
+local mapkey = require("utils.keymapper").mapvimkey
+local maplazykey = require("utils.keymapper").maplazykey
+local mapcmd = require("utils.keymapper").mapcmd
+local mapkey_general = require("utils.keymapper").mapkey_general
 
 
 -- Oil
-vim.keymap.set("n", "-", "<CMD>Oil --float<CR>", { desc = "Open parent directory" })
+mapcmd('n', '-', "Oil --float", { desc = "Open parent directory" })
 
 -- save file
-vim.keymap.set('n', '<C-s>', '<cmd> w <CR>', opts)
-
--- save file without auto-formatting
-vim.keymap.set('n', '<leader>sn', '<cmd>noautocmd w <CR>', opts)
+mapcmd('n', '<C-s>', 'w', { desc = "Save file" })
 
 -- quit file
-vim.keymap.set('n', '<C-q>', '<cmd> q <CR>', opts)
+mapcmd('n', '<C-q>', 'q', { desc = "Quit file" })
 
 -- Show current diagnostic in a float
-vim.keymap.set("n", "gl", vim.diagnostic.open_float, { desc = "Show Diagnostic" })
+mapkey_general("gl", vim.diagnostic.open_float, "n", { desc = "Show Diagnostic" })
 
 -- Toggle diagnostic view
-vim.keymap.set("n", "<Leader>ud", function()
+mapkey_general("<Leader>ud", function()
   vim.diagnostic.enable(not vim.diagnostic.is_enabled())
-end, { desc = "Toggle [D]iagnostics" })
+end, "n", { desc = "Toggle [D]iagnostics" })
 
 
 -- Jump between markdown headers
-vim.keymap.set("n", "gj", [[/^##\+ .*<CR>]], { buffer = true, silent = true })
-vim.keymap.set("n", "gk", [[?^##\+ .*<CR>]], { buffer = true, silent = true })
+mapkey_general("gj", [[/^##\+ .*<CR>]], "n", { buffer = true, silent = true })
+mapkey_general("gk", [[?^##\+ .*<CR>]], "n", { buffer = true, silent = true })
 
 -- Exit insert mode without hitting Esc
-vim.keymap.set("i", "jj", "<Esc><Esc>", { desc = "Esc" })
+mapkey_general("jj", "<Esc><Esc>", "i", { desc = "Esc" })
 
 -- Make Y behave like C or D
-vim.keymap.set("n", "Y", "y$")
+mapkey_general("Y", "y$", "n")
 
 -- Select all
-vim.keymap.set("n", "==", "gg<S-v>G")
+mapkey_general("==", "gg<S-v>G", "n")
 
 -- Keep window centered when going up/down
-vim.keymap.set("n", "J", "mzJ`z")
-vim.keymap.set("n", "<C-d>", "<C-d>zz")
-vim.keymap.set("n", "<C-u>", "<C-u>zz")
-vim.keymap.set("n", "n", "nzzzv")
-vim.keymap.set("n", "N", "Nzzzv")
+mapkey_general("J", "mzJ`z", "n")
+mapkey_general("<C-d>", "<C-d>zz", "n")
+mapkey_general("<C-u>", "<C-u>zz", "n")
+mapkey_general("n", "nzzzv", "n")
+mapkey_general("N", "Nzzzv", "n")
 
 -- delete single character without copying into register
-map({'n', 'v', 'x' }, 'x', '"_x', opts)
+mapkey_general('x', '"_x', {'n', 'v', 'x'}, { desc = "Delete without yanking" })
 -- Keep last yanked when pasting
 -- Visual overwrite paste
-map({ 'v', 'x' }, 'p', '"_dP', opts)
+mapkey_general('p', '"_dP', { 'v', 'x' }, { desc = "Paste without yanking" })
 
 -- Copy text to " register
-map({ 'v', 'n' },  "<leader>y", "\"+y", { desc = "Yank into \" register" })
+mapkey_general("<leader>y", "\"+y", { 'v', 'n' }, { desc = "Yank into \" register" })
 -- vim.keymap.set("v", "<leader>y", "\"+y", { desc = "Yank into \" register" })
-vim.keymap.set("n", "<leader>Y", "\"+Y", { desc = "Yank into \" register" })
+mapkey_general("<leader>Y", "\"+Y", "n", { desc = "Yank into \" register" })
 
 -- Delete text to " register
-map({ 'n', 'v' },  "<leader>d", "\"_d", { desc = "Delete into \" register" })
+mapkey_general("<leader>d", "\"_d", { 'n', 'v' }, { desc = "Delete into \" register" })
 -- vim.keymap.set("v", "<leader>d", "\"_d", { desc = "Delete into \" register" })
 
 -- Get out Q
-vim.keymap.set("n", "Q", "<nop>")
+mapkey_general("Q", "<nop>", "n")
 
 -- Delete words with CTRL-Backspace/Alt-Backspace in insert mode
-vim.keymap.set("i", "<C-BS>", "<C-w>", opts)
-vim.keymap.set("x", "<C-BS>", "<C-w>", opts)
-vim.keymap.set("i", "<M-BS>", "<C-w>", opts)
+mapkey_general("<C-BS>", "<C-w>", "i", { desc = "Delete word backward" })
+mapkey_general("<C-BS>", "<C-w>", "x", { desc = "Delete word backward" })
+mapkey_general("<M-BS>", "<C-w>", "i", { desc = "Delete word backward" })
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
-vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
+mapcmd("n", "<Esc>", "nohlsearch", { desc = "Clear search highlights" })
 -- Buffers
-vim.keymap.set('n', '<Tab>', ':bnext<CR>', { desc = "Next Buffer" })
-vim.keymap.set('n', '<S-Tab>', ':bprevious<CR>', { desc = "Prev Buffer" })
-vim.keymap.set('n', '<leader>b', '<cmd> enew <CR>', { desc = "New Buffer" }) -- new buffer
+mapcmd('n', '<Tab>', 'bnext', { desc = "Next Buffer" })
+mapcmd('n', '<S-Tab>', 'bprevious', { desc = "Prev Buffer" })
+mapcmd('n', '<leader>b', 'enew', { desc = "New Buffer" }) -- new buffer
 
 
 -- Close buffer without closing split
-vim.keymap.set("n", "<leader>w", "<cmd>bp|bd #<CR>", { desc = "Close Buffer; Retain Split" })
+mapcmd("n", "<leader>w", "bp|bd #", { desc = "Close Buffer; Retain Split" })
 
 -- Navigate between quickfix items
-vim.keymap.set("n", "<leader>h", "<cmd>cnext<CR>zz", { desc = "Forward qfixlist" })
-vim.keymap.set("n", "<leader>;", "<cmd>cprev<CR>zz", { desc = "Backward qfixlist" })
+mapcmd("n", "<leader>h", "cnext", { desc = "Forward qfixlist" })
+mapcmd("n", "<leader>;", "cprev", { desc = "Backward qfixlist" })
 
 -- Navigate between location list items
-vim.keymap.set("n", "<leader>k", "<cmd>lnext<CR>zz", { desc = "Forward location list" })
-vim.keymap.set("n", "<leader>j", "<cmd>lprev<CR>zz", { desc = "Backward location list" })
+mapcmd("n", "<leader>k", "lnext", { desc = "Forward location list" })
+mapcmd("n", "<leader>j", "lprev", { desc = "Backward location list" })
 
 -- Replace word under cursor across entire buffer
-vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+mapkey_general("<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], "n",
   { desc = "Replace word under cursor" })
 
 
 -- Jump to plugin management file
-vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/plugins.lua<CR>", { desc = "Jump to configuration file" })
+mapcmd("n", "<leader>vpp", "e ~/.config/nvim/lua/plugins.lua", { desc = "Jump to configuration file" })
 
 -- Run Tests
 -- vim.keymap.set("n", "<leader>t", "<cmd>lua require('neotest').run.run()<CR>", { desc = "Run Test" })
@@ -138,21 +131,21 @@ vim.keymap.set("n", "<leader>vpp", "<cmd>e ~/.config/nvim/lua/plugins.lua<CR>", 
 -- vim.keymap.set("n", "<leader>dl", "<cmd>lua require'dap'.run_last()<CR>", { desc = "Debug Last Test" })
 
 -- Copy file paths
-vim.keymap.set("n", "<leader>cf", "<cmd>let @+ = expand(\"%\")<CR>", { desc = "Copy File Name" })
-vim.keymap.set("n", "<leader>cp", "<cmd>let @+ = expand(\"%:p\")<CR>", { desc = "Copy File Path" })
+mapkey("<leader>cf", "let @+ = expand(\"%\")", "n", { desc = "Copy File Name" })
+mapkey("<leader>cp", "let @+ = expand(\"%:p\")", "n", { desc = "Copy File Path" })
 
 
 -- Dismiss Noice Message
-vim.keymap.set("n", "<leader>nd", "<cmd>NoiceDismiss<CR>", { desc = "Dismiss Noice Message" })
+mapcmd("n", "<leader>nd", "NoiceDismiss", { desc = "Dismiss Noice Message" })
 
 -- Open Zoxide telescope extension
-vim.keymap.set("n", "<leader>Z", "<cmd>Zi<CR>", { desc = "Open Zoxide" })
+mapcmd("n", "<leader>Z", "Zi", { desc = "Open Zoxide" })
 
 -- Resize with arrows
-vim.keymap.set("n", "<C-S-Down>", ":resize +2<CR>", { desc = "Resize Horizontal Split Down" })
-vim.keymap.set("n", "<C-S-Up>", ":resize -2<CR>", { desc = "Resize Horizontal Split Up" })
-vim.keymap.set("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Resize Vertical Split Down" })
-vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Resize Vertical Split Up" })
+mapcmd("n", "<C-S-Down>", "resize +2", { desc = "Resize Horizontal Split Down" })
+mapcmd("n", "<C-S-Up>", "resize -2", { desc = "Resize Horizontal Split Up" })
+mapcmd("n", "<C-Left>", "vertical resize -2", { desc = "Resize Vertical Split Down" })
+mapcmd("n", "<C-Right>", "vertical resize +2", { desc = "Resize Vertical Split Up" })
 
 -- Obsidian
 -- vim.keymap.set("n", "<leader>oc", "<cmd>lua require('obsidian').util.toggle_checkbox()<CR>",
@@ -167,60 +160,60 @@ vim.keymap.set("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Resize Ver
 
 -- FZF related general keymaps
 local fzf = require("fzf-lua")
-vim.keymap.set("n", "<leader>fh", fzf.helptags, { desc = "[F]ind [H]elp" })
-vim.keymap.set("n", "<leader>fk", fzf.keymaps, { desc = "[F]ind [K]eymaps" })
-vim.keymap.set("n", "<leader>ff", fzf.files, { desc = "[F]ind [F]iles" })
-vim.keymap.set("n", "<leader>fp", "<cmd>FzfDirectories<CR>", { desc = "[F]ind [P]aths" })
-vim.keymap.set("n", "<leader>fb", fzf.builtin, { desc = "[F]ind [B]uiltin FZF" })
-vim.keymap.set("n", "<leader>fw", fzf.grep_cword, { desc = "[F]ind current [W]ord" })
-vim.keymap.set("n", "<leader>fW", fzf.grep_cWORD, { desc = "[F]ind current [W]ORD" })
-vim.keymap.set("n", "<leader>fG", fzf.live_grep, { desc = "[F]ind by Live [G]rep" })
-vim.keymap.set("n", "<leader>fg", fzf.grep_project, { desc = "[F]ind by [G]rep" })
-vim.keymap.set("n", "<leader>fd", fzf.diagnostics_document, { desc = "[F]ind [D]iagnostics" })
-vim.keymap.set("n", "<leader>fr", fzf.resume, { desc = "[F]ind [R]esume" })
-vim.keymap.set("n", "<leader>fo", fzf.oldfiles, { desc = "[F]ind [O]ld Files" })
-vim.keymap.set("n", "<leader><leader>", fzf.buffers, { desc = "[,] Find existing buffers" })
-vim.keymap.set("n", "<leader>/", fzf.lgrep_curbuf, { desc = "[/] Live grep the current buffer" })
-vim.keymap.set("n", "<leader>fS", require("fzf-lua").lsp_workspace_symbols, { desc = "[F]ind Workspace [S]ymbols" })
-vim.keymap.set("n", "<leader>fs", require("fzf-lua").lsp_document_symbols, { desc = "[F]ind Document [S]ymbols" })
+mapkey_general("<leader>fh", fzf.helptags, "n", { desc = "[F]ind [H]elp" })
+mapkey_general("<leader>fk", fzf.keymaps, "n", { desc = "[F]ind [K]eymaps" })
+mapkey_general("<leader>ff", fzf.files, "n", { desc = "[F]ind [F]iles" })
+mapcmd("n", "<leader>fp", "FzfDirectories", { desc = "[F]ind [P]aths" })
+mapkey_general("<leader>fb", fzf.builtin, "n", { desc = "[F]ind [B]uiltin FZF" })
+mapkey_general("<leader>fw", fzf.grep_cword, "n", { desc = "[F]ind current [W]ord" })
+mapkey_general("<leader>fW", fzf.grep_cWORD, "n", { desc = "[F]ind current [W]ORD" })
+mapkey_general("<leader>fG", fzf.live_grep, "n", { desc = "[F]ind by Live [G]rep" })
+mapkey_general("<leader>fg", fzf.grep_project, "n", { desc = "[F]ind by [G]rep" })
+mapkey_general("<leader>fd", fzf.diagnostics_document, "n", { desc = "[F]ind [D]iagnostics" })
+mapkey_general("<leader>fr", fzf.resume, "n", { desc = "[F]ind [R]esume" })
+mapkey_general("<leader>fo", fzf.oldfiles, "n", { desc = "[F]ind [O]ld Files" })
+mapkey_general("<leader><leader>", fzf.buffers, "n", { desc = "[,] Find existing buffers" })
+mapkey_general("<leader>/", fzf.lgrep_curbuf, "n", { desc = "[/] Live grep the current buffer" })
+mapkey_general("<leader>fS", require("fzf-lua").lsp_workspace_symbols, "n", { desc = "[F]ind Workspace [S]ymbols" })
+mapkey_general("<leader>fs", require("fzf-lua").lsp_document_symbols, "n", { desc = "[F]ind Document [S]ymbols" })
 -- Search in neovim config
-vim.keymap.set("n", "<leader>fc", function()
+mapkey_general("<leader>fc", function()
   fzf.files({ cwd = vim.fn.stdpath("config") })
-end, { desc = "[F]ind Neovim [C]onfig files" })
+end, "n", { desc = "[F]ind Neovim [C]onfig files" })
 -- Search in my dotfiles config
-vim.keymap.set("n", "<leader>fd", function()
+mapkey_general("<leader>fd", function()
   fzf.files({ cwd = os.getenv("HOME") .. "/dotfiles" })
-end, { desc = "[F]ind [D]otfiles" })
+end, "n", { desc = "[F]ind [D]otfiles" })
 -- Search in TODOs, FIXMEs, HACKs, via todo-comments.nvim
-vim.keymap.set("n", "<leader>ft", function()
+mapkey_general("<leader>ft", function()
   require("todo-comments.fzf").todo()
-end, { desc = "[F]ind [T]odos, Fixmes, Hacks, ..." })
+end, "n", { desc = "[F]ind [T]odos, Fixmes, Hacks, ..." })
 -- Navigate between TODOs and such
-vim.keymap.set("n", "]t", function()
+mapkey_general("]t", function()
   require("todo-comments").jump_next()
-end, { desc = "Next todo comment" })
-vim.keymap.set("n", "[t", function()
+end, "n", { desc = "Next todo comment" })
+mapkey_general("[t", function()
   require("todo-comments").jump_prev()
-end, { desc = "Previous todo comment" })
+end, "n", { desc = "Previous todo comment" })
 
 -- Visual --
 -- Stay in indent mode
-vim.keymap.set("v", "<", "<gv")
-vim.keymap.set("v", ">", ">gv")
+mapkey_general("<", "<gv", "v")
+mapkey_general(">", ">gv", "v")
 
-vim.keymap.set({ "n", "o", "x" }, "<s-h>", "^", { desc = "Jump to beginning of line" })
-vim.keymap.set({ "n", "o", "x" }, "<s-l>", "g_", { desc = "Jump to end of line" })
+mapkey_general("<s-h>", "^", { "n", "o", "x" }, { desc = "Jump to beginning of line" })
+mapkey_general("<s-l>", "g_", { "n", "o", "x" }, { desc = "Jump to end of line" })
 
 -- Toggle line wrapping
-vim.keymap.set('n', '<leader>lw', '<cmd>set wrap!<CR>', opts)
+mapcmd('n', '<leader>lw', 'set wrap!', { desc = "Toggle line wrapping" })
 
 -- Move block
-vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move Block Down" })
-vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move Block Up" })
+mapkey_general("J", ":m '>+1<CR>gv=gv", "v", { desc = "Move Block Down" })
+mapkey_general("K", ":m '<-2<CR>gv=gv", "v", { desc = "Move Block Up" })
 
 -- Search for highlighted text in buffer
-vim.keymap.set("v", "//", 'y/<C-R>"<CR>', { desc = "Search for highlighted text" })
+mapkey_general("//", 'y/<C-R>"<CR>', "v", { desc = "Search for highlighted text" })
 
 -- Exit terminal mode shortcut
-vim.keymap.set("t", "<C-t>", "<C-\\><C-n>")
+mapkey_general("<C-t>", "<C-\\><C-n>", "t")
 

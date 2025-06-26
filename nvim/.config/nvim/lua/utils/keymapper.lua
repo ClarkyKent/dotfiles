@@ -63,58 +63,31 @@ local maplazykey = function(keymaps, cmd, desc)
 	return { keymaps, cmd, desc = desc }
 end
 
+--- @param mode string|table - Vim mode(s)
+--- @param lhs string - Left-hand side (key combination)
+--- @param command string - The command to execute (without <cmd> and <CR>)
+--- @param opts table|nil - Options table (optional)
+--- @return nil
+local mapcmd = function(mode, lhs, command, opts)
+	local rhs = get_cmd_string(command)
+	local options = get_opts(opts)
+	vim.keymap.set(mode, lhs, rhs, options)
+end
+
+--- @param lhs string - Left-hand side (key combination)
+--- @param rhs string|function - Right-hand side (key sequence, function, or command)
+--- @param mode string|table|nil - Vim mode(s), defaults to 'n'
+--- @param opts table|nil - Options table (optional)
+--- @return nil
+local mapkey_general = function(lhs, rhs, mode, opts)
+	local vim_mode = mode or "n"
+	local options = get_opts(opts)
+	vim.keymap.set(vim_mode, lhs, rhs, options)
+end
+
 return {
 	mapvimkey = mapvimkey,
 	maplazykey = maplazykey,
-}
-
-{
-  "neovim/nvim-lspconfig",
-  opts = {
-    servers = {
-      -- Ensure mason installs the server
-      clangd = {
-        keys = {
-          { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
-        },
-        root_dir = function(fname)
-          return require("lspconfig.util").root_pattern(
-            "Makefile",
-            "configure.ac",
-            "configure.in",
-            "config.h.in",
-            "meson.build",
-            "meson_options.txt",
-            "build.ninja"
-          )(fname) or require("lspconfig.util").root_pattern("compile_commands.json", "compile_flags.txt")(
-            fname
-          ) or require("lspconfig.util").find_git_ancestor(fname)
-        end,
-        capabilities = {
-          offsetEncoding = { "utf-16" },
-        },
-        cmd = {
-          "clangd",
-          "--background-index",
-          "--clang-tidy",
-          "--header-insertion=iwyu",
-          "--completion-style=detailed",
-          "--function-arg-placeholders",
-          "--fallback-style=llvm",
-        },
-        init_options = {
-          usePlaceholders = true,
-          completeUnimported = true,
-          clangdFileStatus = true,
-        },
-      },
-    },
-    setup = {
-      clangd = function(_, opts)
-        local clangd_ext_opts = LazyVim.opts("clangd_extensions.nvim")
-        require("clangd_extensions").setup(vim.tbl_deep_extend("force", clangd_ext_opts or {}, { server = opts }))
-        return false
-      end,
-    },
-  },
+	mapcmd = mapcmd,
+	mapkey_general = mapkey_general,
 }
