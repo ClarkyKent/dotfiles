@@ -5,17 +5,18 @@ return {
   },
   keys = {
     {
-      "<leader>z",
+      "<leader>uz",
       function()
         require("zen-mode").toggle()
       end,
       mode = { "n" },
-      desc = "Toggle [Z]en Mode",
+      desc = "[U]i Toggle [Z]en Mode",
     },
   },
   opts = {
+    backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
     window = {
-      width = 100,
+      width = 120,
       options = {
         signcolumn = "no",
         number = false,

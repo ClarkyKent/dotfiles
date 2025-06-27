@@ -142,11 +142,6 @@ local function lsp_keymaps(client, bufnr)
   -- you should use the wincmd command "<C-w>w"
 
   keymap("n", "K", vim.lsp.buf.hover)
-
-  if client.name == "clangd" then
-    require("clangd_extensions.inlay_hints").setup_autocmd()
-    require("clangd_extensions.inlay_hints").set_inlay_hints()
-  end
 end
 
 util.on_attach = function(client, bufnr)

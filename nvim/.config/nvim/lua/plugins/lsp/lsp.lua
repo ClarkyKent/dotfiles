@@ -18,6 +18,7 @@ return {
       inlay_hints = { enabled = true },
     },
     dependencies = {
+       { "p00f/clangd_extensions.nvim" },
       -- Useful status updates for LSP.
       -- LSP and notify updates in the down right corner
       {
@@ -88,6 +89,28 @@ return {
           capabilities = blink_capabilities,
         })
       end
+
+      lspconfig.clangd.setup({
+        capabilities = blink_capabilities,
+        on_attach = util.on_attach,
+        keys = {
+          { "<leader>ch", "<cmd>ClangdSwitchSourceHeader<cr>", desc = "Switch Source/Header (C/C++)" },
+        },
+        root_dir = function(fname)
+          return require("lspconfig.util").root_pattern(
+            "Makefile",
+            "configure.ac",
+            "configure.in",
+            "config.h.in",
+            "meson.build",
+            "meson_options.txt",
+            "meson.options",
+            "build.ninja"
+          )(fname) or require("lspconfig.util").root_pattern("compile_commands.json", "compile_flags.txt")(
+            fname
+          ) or require("lspconfig.util").find_git_ancestor(fname)
+        end,
+      })
     end,
   },
 }

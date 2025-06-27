@@ -3,6 +3,7 @@ return {
   -- optional: provides snippets for the snippet source
   dependencies = {  'rafamadriz/friendly-snippets' ,
                     -- "giuxtaposition/blink-cmp-copilot",
+					"fang2hou/blink-copilot", 
                   },
 	event = { "InsertEnter", "CmdlineEnter" },
 	version = "1.*",
@@ -50,7 +51,7 @@ return {
 		},
 		snippets = { preset = "luasnip" },
 		sources = {
-			default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+			default = { "copilot", "lazydev", "lsp", "path", "snippets", "buffer" },
 			providers = {
 				lazydev = {
 					name = "LazyDev",
@@ -58,6 +59,12 @@ return {
 					-- make lazydev completions top priority (see `:h blink.cmp`)
 					score_offset = 100,
 				},
+				copilot = {
+					name = "copilot",
+					module = "blink-copilot",
+					score_offset = 100,
+					async = true,
+					},
 			},
 		},
 		signature = {
