@@ -4,6 +4,7 @@
   "advanced-git-search.nvim": { "branch": "main", "commit": "69a41a3351d89e8be597fe5682265d8c99b8b12c" },
   "base46": { "branch": "v3.0", "commit": "2dbb72f4ae6f78cb3adc60c2c3b69524f97c9cd6" },
   "blink.cmp": { "branch": "main", "commit": "9bcb14b43852a6f2bfd5ac9ef29cb5cf09b1b39b" },
+  "clangd_extensions.nvim": { "branch": "main", "commit": "db28f29be928d18cbfb86fbfb9f83f584f658feb" },
   "conform.nvim": { "branch": "master", "commit": "8132ec733eed3bf415b97b76797ca41b59f51d7d" },
   "flash.nvim": { "branch": "main", "commit": "3c942666f115e2811e959eabbdd361a025db8b63" },
   "friendly-snippets": { "branch": "main", "commit": "572f5660cf05f8cd8834e096d7b4c921ba18e175" },
