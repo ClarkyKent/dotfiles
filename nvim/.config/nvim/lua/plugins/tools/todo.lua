@@ -1,11 +1,9 @@
-
-
 return {
   "folke/todo-comments.nvim",
-   dependencies = { 
+  dependencies = {
     "nvim-lua/plenary.nvim",
     "ibhagwan/fzf-lua",
-    "folke/trouble.nvim", 
+    "folke/trouble.nvim",
   },
   lazy = false,
   cmd = { "TodoTrouble", "TodoFzfLua" },

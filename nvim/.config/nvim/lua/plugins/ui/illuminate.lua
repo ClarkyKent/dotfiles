@@ -1,4 +1,5 @@
 return {
+  {
     "RRethy/vim-illuminate",
     config = function()
       -- default configuration
@@ -60,3 +61,4 @@ return {
     })
     end,
   }
+}
