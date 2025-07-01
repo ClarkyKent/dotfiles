@@ -19,10 +19,8 @@ return {
     -- plugin.
   },
 
-  -- test new blink
-  -- { import = "nvchad.blink.lazyspec" },
-
   { import = "plugins.ui" },
+  { import = "plugins.lsp" },
   { import = "plugins.editor" },
   { import = "plugins.tools" },
   { import = "plugins.git" },

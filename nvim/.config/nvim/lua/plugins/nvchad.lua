@@ -137,22 +137,22 @@ return {
         "hrsh7th/cmp-nvim-lua",
         "hrsh7th/cmp-nvim-lsp",
         "hrsh7th/cmp-buffer",
-        "https://codeberg.org/FelipeLema/cmp-async-path.git"
-      }
+        "https://codeberg.org/FelipeLema/cmp-async-path.git",
+      },
     },
     opts = function()
       return require "configs.nvchad.cmp"
     end,
   },
 
-  {
-    "nvim-telescope/telescope.nvim",
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
-    cmd = "Telescope",
-    opts = function()
-      return require "configs.nvchad.telescope"
-    end,
-  },
+  -- {
+  --   "nvim-telescope/telescope.nvim",
+  --   dependencies = { "nvim-treesitter/nvim-treesitter" },
+  --   cmd = "Telescope",
+  --   opts = function()
+  --     return require "configs.nvchad.telescope"
+  --   end,
+  -- },
 
   {
     "nvim-treesitter/nvim-treesitter",

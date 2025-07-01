@@ -1,4 +1,8 @@
 -- require "nvchad.mappings"
+local mapkey = require("utils.keymapper").mapvimkey
+local maplazykey = require("utils.keymapper").maplazykey
+local mapcmd = require("utils.keymapper").mapcmd
+local mapkey_general = require("utils.keymapper").mapkey_general
 
 local map = vim.keymap.set
 
@@ -53,28 +57,48 @@ map("v", "<leader>/", "gc", { desc = "toggle comment", remap = true })
 map("n", "<C-n>", "<cmd>NvimTreeToggle<CR>", { desc = "nvimtree toggle window" })
 map("n", "<leader>e", "<cmd>NvimTreeFocus<CR>", { desc = "nvimtree focus window" })
 
--- telescope
-map("n", "<leader>fw", "<cmd>Telescope live_grep<CR>", { desc = "telescope live grep" })
-map("n", "<leader>fb", "<cmd>Telescope buffers<CR>", { desc = "telescope find buffers" })
-map("n", "<leader>fh", "<cmd>Telescope help_tags<CR>", { desc = "telescope help page" })
-map("n", "<leader>ma", "<cmd>Telescope marks<CR>", { desc = "telescope find marks" })
-map("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>", { desc = "telescope find oldfiles" })
-map("n", "<leader>fz", "<cmd>Telescope current_buffer_fuzzy_find<CR>", { desc = "telescope find in current buffer" })
-map("n", "<leader>cm", "<cmd>Telescope git_commits<CR>", { desc = "telescope git commits" })
-map("n", "<leader>gt", "<cmd>Telescope git_status<CR>", { desc = "telescope git status" })
-map("n", "<leader>pt", "<cmd>Telescope terms<CR>", { desc = "telescope pick hidden term" })
+-- FZF related general keymaps
+local fzf = require "fzf-lua"
+mapkey_general("<leader>fh", fzf.helptags, "n", { desc = "[F]ind [H]elp" })
+mapkey_general("<leader>fk", fzf.keymaps, "n", { desc = "[F]ind [K]eymaps" })
+mapkey_general("<leader>ff", fzf.files, "n", { desc = "[F]ind [F]iles" })
+mapcmd("n", "<leader>fp", "FzfDirectories", { desc = "[F]ind [P]aths" })
+mapkey_general("<leader>fb", fzf.builtin, "n", { desc = "[F]ind [B]uiltin FZF" })
+mapkey_general("<leader>fw", fzf.grep_cword, "n", { desc = "[F]ind current [W]ord" })
+mapkey_general("<leader>fW", fzf.grep_cWORD, "n", { desc = "[F]ind current [W]ORD" })
+mapkey_general("<leader>fG", fzf.live_grep, "n", { desc = "[F]ind by Live [G]rep" })
+mapkey_general("<leader>fg", fzf.grep_project, "n", { desc = "[F]ind by [G]rep" })
+mapkey_general("<leader>fd", fzf.diagnostics_document, "n", { desc = "[F]ind [D]iagnostics" })
+mapkey_general("<leader>fr", fzf.resume, "n", { desc = "[F]ind [R]esume" })
+mapkey_general("<leader>fo", fzf.oldfiles, "n", { desc = "[F]ind [O]ld Files" })
+mapkey_general("<leader><leader>", fzf.buffers, "n", { desc = "[,] Find existing buffers" })
+mapkey_general("<leader>/", fzf.lgrep_curbuf, "n", { desc = "[/] Live grep the current buffer" })
+mapkey_general("<leader>fS", require("fzf-lua").lsp_workspace_symbols, "n", { desc = "[F]ind Workspace [S]ymbols" })
+mapkey_general("<leader>fs", require("fzf-lua").lsp_document_symbols, "n", { desc = "[F]ind Document [S]ymbols" })
+
+-- Search in neovim config
+mapkey_general("<leader>fc", function()
+  fzf.files { cwd = vim.fn.stdpath "config" }
+end, "n", { desc = "[F]ind Neovim [C]onfig files" })
+-- Search in my dotfiles config
+mapkey_general("<leader>fd", function()
+  fzf.files { cwd = os.getenv "HOME" .. "/dotfiles" }
+end, "n", { desc = "[F]ind [D]otfiles" })
+-- Search in TODOs, FIXMEs, HACKs, via todo-comments.nvim
+mapkey_general("<leader>ft", function()
+  require("todo-comments.fzf").todo()
+end, "n", { desc = "[F]ind [T]odos, Fixmes, Hacks, ..." })
+-- Navigate between TODOs and such
+mapkey_general("]t", function()
+  require("todo-comments").jump_next()
+end, "n", { desc = "Next todo comment" })
+mapkey_general("[t", function()
+  require("todo-comments").jump_prev()
+end, "n", { desc = "Previous todo comment" })
 
 map("n", "<leader>th", function()
   require("nvchad.themes").open()
 end, { desc = "telescope nvchad themes" })
-
-map("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "telescope find files" })
-map(
-  "n",
-  "<leader>fa",
-  "<cmd>Telescope find_files follow=true no_ignore=true hidden=true<CR>",
-  { desc = "telescope find all files" }
-)
 
 -- terminal
 map("t", "<C-x>", "<C-\\><C-N>", { desc = "terminal escape terminal mode" })
@@ -111,3 +135,18 @@ end, { desc = "whichkey query lookup" })
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
+
+-- Visual --
+-- Stay in indent mode
+mapkey_general("<", "<gv", "v")
+mapkey_general(">", ">gv", "v")
+
+mapkey_general("<s-h>", "^", { "n", "o", "x" }, { desc = "Jump to beginning of line" })
+mapkey_general("<s-l>", "g_", { "n", "o", "x" }, { desc = "Jump to end of line" })
+
+-- Move block
+mapkey_general("J", ":m '>+1<CR>gv=gv", "v", { desc = "Move Block Down" })
+mapkey_general("K", ":m '<-2<CR>gv=gv", "v", { desc = "Move Block Up" })
+
+-- Search for highlighted text in buffer
+mapkey_general("//", 'y/<C-R>"<CR>', "v", { desc = "Search for highlighted text" })
