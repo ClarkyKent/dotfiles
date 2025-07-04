@@ -73,6 +73,9 @@ zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
+# Aliases: editor
+alias e="$EDITOR"
+alias E="sudo -e"
 
 # Aliases: ls
 alias l='eza -GA --group-directories-first --color=always --icons=auto --git-ignore'
