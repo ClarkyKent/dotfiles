@@ -113,3 +113,5 @@ eval "$(direnv hook zsh)"
 if [ -e /home/quara/.nix-profile/etc/profile.d/nix.sh ]; then . /home/quara/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
 # export PATH="/home/linuxbrew/.linuxbrew/opt/clang-format/bin:$PATH"
 # export PATH="/home/quara/.cargo/bin:$PATH"
+
+source /home/quara/.config/broot/launcher/bash/br
