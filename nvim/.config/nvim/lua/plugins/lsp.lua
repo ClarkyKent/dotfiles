@@ -1,373 +1,467 @@
--- LSP configuration (LazyVim style - Updated for nvim 0.11+)
 return {
   -- LSP Configuration
   {
     "neovim/nvim-lspconfig",
-    event = { "BufReadPost", "BufNewFile", "BufWritePre" },
     dependencies = {
-      "mason.nvim",
-      { "mason-org/mason-lspconfig.nvim", config = function() end },
+      "williamboman/mason.nvim",
+      "williamboman/mason-lspconfig.nvim",
+      "saghen/blink.cmp",
+      {
+        "folke/lazydev.nvim",
+        ft = "lua", -- only load on lua files
+        opts = {
+          library = {
+            -- See the configuration section for more details
+            -- Load luvit types when the `vim.uv` word is found
+            { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+          },
+        },
+      },
     },
-    opts = function()
-      ---@class PluginLspOpts
-      local ret = {
-        -- options for vim.diagnostic.config()
-        ---@type vim.diagnostic.Opts
-        diagnostics = {
-          underline = true,
-          update_in_insert = false,
-          virtual_text = {
-            spacing = 4,
-            source = "if_many",
-            prefix = "●",
-          },
-          severity_sort = true,
-          signs = {
-            text = {
-              [vim.diagnostic.severity.ERROR] = "✘",
-              [vim.diagnostic.severity.WARN] = "▲",
-              [vim.diagnostic.severity.HINT] = "⚑",
-              [vim.diagnostic.severity.INFO] = "»",
-            },
-          },
-          float = {
-            focusable = false,
-            style = "minimal",
-            border = "rounded",
-            source = "if_many",
-            header = "",
-            prefix = "",
+    opts = {
+      -- Options for vim.diagnostic.config()
+      diagnostics = {
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+        virtual_text = {
+          spacing = 4,
+          source = "if_many",
+          prefix = function(diagnostic)
+            local icons = {
+              [vim.diagnostic.severity.ERROR] = " ",
+              [vim.diagnostic.severity.WARN] = " ",
+              [vim.diagnostic.severity.HINT] = " ",
+              [vim.diagnostic.severity.INFO] = " ",
+            }
+            return icons[diagnostic.severity] or "●"
+          end,
+        },
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN] = " ",
+            [vim.diagnostic.severity.HINT] = " ",
+            [vim.diagnostic.severity.INFO] = " ",
           },
         },
-        -- Enable inlay hints (requires LSP server support)
-        inlay_hints = {
-          enabled = true,
-          exclude = { "vue" }, -- filetypes for which you don't want to enable inlay hints
+        float = {
+          focused = false,
+          style = "minimal",
+          border = "rounded",
+          source = "always",
+          header = "",
+          prefix = "",
         },
-        -- Enable code lens (requires LSP server support)
-        codelens = {
-          enabled = false,
-        },
-        -- Enable folds (requires LSP server support)
-        folds = {
-          enabled = true,
-        },
-        -- add any global capabilities here
-        capabilities = {
-          textDocument = {
-            semanticTokens = {
-              dynamicRegistration = false,
-              tokenTypes = {
-                "namespace",
-                "type", "class", "enum", "interface", "struct", "typeParameter",
-                "parameter", "variable", "property", "enumMember", "event", "function",
-                "method", "macro", "keyword", "modifier", "comment", "string", "number",
-                "regexp", "operator",
+      },
+      -- Enable this to show formatters used in a notification
+      -- Useful for debugging formatter issues
+      format_notify = false,
+      -- Automatic formatting is handled by conform.nvim
+      
+      -- LSP Server Settings
+      servers = {
+        lua_ls = {
+          cmd = { "lua-language-server" },
+          filetypes = { "lua" },
+          root_markers = { ".luarc.json", ".luarc.jsonc", ".luacheckrc", ".stylua.toml", "stylua.toml", "selene.toml", "selene.yml", ".git" },
+          settings = {
+            Lua = {
+              workspace = {
+                checkThirdParty = false,
               },
-              tokenModifiers = {
-                "declaration", "definition", "readonly", "static", "deprecated",
-                "abstract", "async", "modification", "documentation", "defaultLibrary",
-              },
-              formats = { "relative" },
-              requests = {
-                range = true,
-                full = {
-                  delta = true,
-                },
+              completion = {
+                callSnippet = "Replace",
               },
             },
           },
-          workspace = {
-            fileOperations = {
-              didRename = true,
-              willRename = true,
-            },
+        },
+        clangd = {
+          filetypes = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+          root_markers = { "compile_commands.json", "compile_flags.txt", ".clangd", "Makefile", "meson.build", ".git" },
+          capabilities = {
+            offsetEncoding = { "utf-16" },
+          },
+          cmd = {
+            "clangd",
+            "--background-index",
+            "--clang-tidy",
+            "--header-insertion=iwyu",
+            "--completion-style=detailed",
+            "--function-arg-placeholders",
+            "--fallback-style=llvm",
+            "--pch-storage=memory",
+            "--all-scopes-completion",
+            "--pretty",
+          },
+          init_options = {
+            usePlaceholders = true,
+            completeUnimported = true,
+            clangdFileStatus = true,
+            -- Fallback clang-tidy checks when .clang-tidy doesn't exist
+            fallbackFlags = { "-Wall", "-Wextra", "-Wpedantic" },
           },
         },
-        -- options for vim.lsp.buf.format
-        format = {
-          formatting_options = nil,
-          timeout_ms = nil,
+        bashls = {
+          cmd = { "bash-language-server", "start" },
+          filetypes = { "sh", "bash" },
+          root_markers = { ".git" },
         },
-        -- LSP Server Settings
-        ---@type table<string, vim.lsp.Config|boolean>
-        servers = {
-          lua_ls = {
-            -- mason = false, -- set to false if you don't want this server to be installed with mason
-            settings = {
-              Lua = {
-                workspace = {
-                  checkThirdParty = false,
-                },
-                codeLens = {
-                  enable = true,
-                },
-                completion = {
-                  callSnippet = "Replace",
-                },
-                doc = {
-                  privateName = { "^_" },
-                },
-                hint = {
-                  enable = true,
-                  setType = false,
-                  paramType = true,
-                  paramName = "Disable",
-                  semicolon = "Disable",
-                  arrayIndex = "Disable",
-                },
+        dockerls = {
+          cmd = { "docker-langserver", "--stdio" },
+          filetypes = { "dockerfile" },
+          root_markers = { "Dockerfile", ".git" },
+        },
+        jsonls = {
+          cmd = { "vscode-json-language-server", "--stdio" },
+          filetypes = { "json", "jsonc" },
+          root_markers = { ".git" },
+        },
+        yamlls = {
+          cmd = { "yaml-language-server", "--stdio" },
+          filetypes = { "yaml", "yaml.docker-compose" },
+          root_markers = { ".git" },
+        },
+        cmake = {
+          cmd = { "cmake-language-server" },
+          filetypes = { "cmake" },
+          root_markers = { "CMakeLists.txt", ".git" },
+        },
+        marksman = {
+          cmd = { "marksman", "server" },
+          filetypes = { "markdown" },
+          root_markers = { ".marksman.toml", ".git" },
+        },
+        rust_analyzer = {
+          cmd = { "rust-analyzer" },
+          filetypes = { "rust" },
+          root_markers = { "Cargo.toml", "rust-project.json", ".git" },
+          settings = {
+            ["rust-analyzer"] = {
+              cargo = {
+                allFeatures = true,
+                loadOutDirsFromCheck = true,
+                runBuildScripts = true,
               },
-            },
-          },
-          jsonls = {
-            -- lazy-load schemastore when needed
-            on_new_config = function(new_config)
-              new_config.settings.json.schemas = new_config.settings.json.schemas or {}
-              vim.list_extend(new_config.settings.json.schemas, require("schemastore").json.schemas())
-            end,
-            settings = {
-              json = {
-                format = {
-                  enable = true,
-                },
-                validate = { enable = true },
+              checkOnSave = {
+                allFeatures = true,
+                command = "clippy",
+                extraArgs = { "--no-deps" },
               },
-            },
-          },
-          yamlls = {
-            -- Have to add this for yamlls to understand that we support line folding
-            capabilities = {
-              textDocument = {
-                foldingRange = {
-                  dynamicRegistration = false,
-                  lineFoldingOnly = true,
-                },
-              },
-            },
-            -- lazy-load schemastore when needed
-            on_new_config = function(new_config)
-              new_config.settings.yaml.schemas = new_config.settings.yaml.schemas or {}
-              vim.list_extend(new_config.settings.yaml.schemas, require("schemastore").yaml.schemas())
-            end,
-            settings = {
-              redhat = { telemetry = { enabled = false } },
-              yaml = {
-                keyOrdering = false,
-                format = {
-                  enable = true,
-                },
-                validate = true,
-                schemaStore = {
-                  -- Must disable built-in schemaStore support to use
-                  -- schemas from SchemaStore.nvim plugin
-                  enable = false,
-                  -- Avoid TypeError: Cannot read properties of undefined (reading 'length')
-                  url = "",
+              procMacro = {
+                enable = true,
+                ignored = {
+                  ["async-trait"] = { "async_trait" },
+                  ["napi-derive"] = { "napi" },
+                  ["async-recursion"] = { "async_recursion" },
                 },
               },
             },
           },
         },
-        -- you can do any additional lsp server setup here
-        -- return true if you don't want this server to be setup with lspconfig
-        ---@type table<string, fun(server:string, opts: vim.lsp.Config):boolean?>
-        setup = {
-          -- example to setup with typescript.nvim
-          -- tsserver = function(_, opts)
-          --   require("typescript").setup({ server = opts })
-          --   return true
-          -- end,
-          -- Specify * to use this function as a fallback for any server
-          -- ["*"] = function(server, opts) end,
+        pyright = {
+          cmd = { "pyright-langserver", "--stdio" },
+          filetypes = { "python" },
+          root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json", ".git" },
         },
-      }
-      return ret
-    end,
-    ---@param opts PluginLspOpts
+      },
+      setup = {
+        -- Let lspconfig handle clangd normally, clangd_extensions will enhance it
+      },
+    },
     config = function(_, opts)
-      -- Setup keymaps
-      local function on_attach(client, buffer)
-        -- LSP keymaps
-        local keys = {
-          { "gd", vim.lsp.buf.definition, desc = "Goto Definition" },
-          { "gr", vim.lsp.buf.references, desc = "References" },
-          { "gI", vim.lsp.buf.implementation, desc = "Goto Implementation" },
-          { "gy", vim.lsp.buf.type_definition, desc = "Goto Type Definition" },
-          { "gD", vim.lsp.buf.declaration, desc = "Goto Declaration" },
-          { "K", vim.lsp.buf.hover, desc = "Hover" },
-          { "gK", vim.lsp.buf.signature_help, desc = "Signature Help" },
-          { "<c-k>", vim.lsp.buf.signature_help, desc = "Signature Help", mode = "i" },
-          { "<leader>ca", vim.lsp.buf.code_action, desc = "Code Action", mode = { "n", "v" } },
-          { "<leader>cc", vim.lsp.codelens.run, desc = "Run Codelens", mode = { "n", "v" } },
-          { "<leader>cC", vim.lsp.codelens.refresh, desc = "Refresh Codelens" },
-          { "<leader>cr", vim.lsp.buf.rename, desc = "Rename" },
+      -- Apply diagnostic options
+      if opts.diagnostics then
+        vim.diagnostic.config(opts.diagnostics)
+      end
+
+      -- Setup Mason first
+      require("mason").setup()
+
+      -- Ensure Mason bin is in PATH
+      local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+      if not string.find(vim.env.PATH or "", mason_bin) then
+        vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
+      end
+      local mr = require("mason-registry")
+      local function ensure_installed()
+        local packages = {
+          "clangd",
+          "clang-format",
+          "codelldb", -- Debugger for C/C++/Rust
+          "bash-language-server",
+          "dockerfile-language-server",
+          "json-lsp",
+          "yaml-language-server",
+          "cmake-language-server",
+          "marksman",
+          "rust-analyzer",
+          "pyright",
+          "black", -- Python formatter
+          "isort", -- Python formatter
+          "shfmt", -- Shell formatter
+          "shellcheck", -- Shell linter
         }
-
-        -- Enhanced keymaps with fzf-lua if available
-        local has_fzf, fzf = pcall(require, "fzf-lua")
-        if has_fzf then
-          keys[2] = { "gr", fzf.lsp_references, desc = "References (FZF)" }
-          keys[1] = { "gd", fzf.lsp_definitions, desc = "Definitions (FZF)" }
-          keys[3] = { "gI", fzf.lsp_implementations, desc = "Implementations (FZF)" }
-          keys[4] = { "gy", fzf.lsp_typedefs, desc = "Type Definitions (FZF)" }
-          vim.keymap.set("n", "<leader>ds", fzf.lsp_document_symbols, { buffer = buffer, desc = "Document Symbols" })
-          vim.keymap.set("n", "<leader>ws", fzf.lsp_workspace_symbols, { buffer = buffer, desc = "Workspace Symbols" })
-        end
-
-        for _, key in pairs(keys) do
-          local opts_key = { buffer = buffer, desc = key.desc, silent = true }
-          if key.mode then
-            vim.keymap.set(key.mode, key[1], key[2], opts_key)
-          else
-            vim.keymap.set("n", key[1], key[2], opts_key)
+        for _, tool in ipairs(packages) do
+          local p = mr.get_package(tool)
+          if not p:is_installed() then
+            p:install()
           end
         end
       end
-
-      -- inlay hints
-      if opts.inlay_hints.enabled then
-        vim.api.nvim_create_autocmd("LspAttach", {
-          callback = function(args)
-            local buffer = args.buf ---@type number
-            local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client and client:supports_method("textDocument/inlayHint") then
-              if
-                vim.api.nvim_buf_is_valid(buffer)
-                and vim.bo[buffer].buftype == ""
-                and not vim.tbl_contains(opts.inlay_hints.exclude, vim.bo[buffer].filetype)
-              then
-                vim.lsp.inlay_hint.enable(true, { bufnr = buffer })
-              end
-            end
-          end,
-        })
+      if mr.refresh then
+        mr.refresh(ensure_installed)
+      else
+        ensure_installed()
       end
 
-      -- folds
-      if opts.folds.enabled then
-        vim.api.nvim_create_autocmd("LspAttach", {
-          callback = function(args)
-            local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client and client:supports_method("textDocument/foldingRange") then
-              vim.wo.foldmethod = "expr"
-              vim.wo.foldexpr = "v:lua.vim.lsp.foldexpr()"
-            end
-          end,
-        })
-      end
+      -- Setup Servers
+      local servers = opts.servers
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-      -- code lens
-      if opts.codelens.enabled and vim.lsp.codelens then
-        vim.api.nvim_create_autocmd("LspAttach", {
-          callback = function(args)
-            local buffer = args.buf
-            local client = vim.lsp.get_client_by_id(args.data.client_id)
-            if client and client:supports_method("textDocument/codeLens") then
-              vim.lsp.codelens.refresh()
-              vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "InsertLeave" }, {
-                buffer = buffer,
-                callback = vim.lsp.codelens.refresh,
-              })
-            end
-          end,
-        })
-      end
+      -- Note: LSP keymaps are handled via LspAttach autocmd in lua/config/autocmds.lua
 
-      -- diagnostics
-      vim.diagnostic.config(vim.deepcopy(opts.diagnostics))
+      local function setup(server)
+        local server_opts = vim.tbl_deep_extend("force", {
+          capabilities = vim.deepcopy(capabilities),
+        }, servers[server] or {})
 
-      if opts.capabilities then
-        vim.lsp.config("*", { capabilities = opts.capabilities })
-      end
-
-      -- Get all the servers that are available through mason-lspconfig
-      local have_mason = pcall(require, "mason-lspconfig")
-      local mason_all = {}
-      if have_mason then
-        local ok, mappings = pcall(require, "mason-lspconfig.mappings")
-        if ok and mappings.get_mason_map then
-          mason_all = vim.tbl_keys(mappings.get_mason_map().lspconfig_to_package) or {}
-        end
-      end
-      local mason_exclude = {} ---@type string[]
-
-      ---@return boolean? exclude automatic setup
-      local function configure(server)
-        local sopts = opts.servers[server]
-        sopts = sopts == true and {} or (not sopts) and { enabled = false } or sopts
-
-        if sopts.enabled == false then
-          mason_exclude[#mason_exclude + 1] = server
-          return
-        end
-
-        local use_mason = sopts.mason ~= false and vim.tbl_contains(mason_all, server)
-
-        local setup = opts.setup[server] or opts.setup["*"]
-        if setup and setup(server, sopts) then
-          mason_exclude[#mason_exclude + 1] = server
-        else
-          vim.lsp.config(server, sopts) -- configure the server using new API
-          if not use_mason then
-            vim.lsp.enable(server)
+        if opts.setup[server] then
+          if opts.setup[server](server, server_opts) then
+            return
+          end
+        elseif opts.setup["*"] then
+          if opts.setup["*"](server, server_opts) then
+            return
           end
         end
-        return use_mason
+
+        -- Use vim.lsp.config API for nvim 0.11+
+        vim.lsp.config(server, server_opts)
+        vim.lsp.enable(server)
       end
 
-      -- Setup on_attach for all servers
+      -- Setup all configured servers
+      for server_name, _ in pairs(servers) do
+        setup(server_name)
+      end
+
+      -- Enable inlay hints if supported
       vim.api.nvim_create_autocmd("LspAttach", {
         callback = function(args)
-          local buffer = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          on_attach(client, buffer)
+          if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
+            vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+          end
         end,
       })
-
-      local install = vim.tbl_filter(configure, vim.tbl_keys(opts.servers))
-      if have_mason then
-        require("mason-lspconfig").setup({
-          ensure_installed = install,
-          automatic_enable = { exclude = mason_exclude },
-        })
+      
+      -- Native LSP folding
+      vim.o.foldlevel = 99
+      vim.o.foldlevelstart = 99
+      vim.o.foldenable = true
+      if vim.fn.has("nvim-0.10") == 1 then
+        vim.o.foldmethod = "expr"
+        vim.o.foldexpr = "v:lua.vim.lsp.foldexpr()"
+      else
+        vim.o.foldmethod = "indent"
       end
     end,
   },
 
-  -- cmdline tools and lsp servers
+  -- Mason
   {
-    "mason-org/mason.nvim",
+    "williamboman/mason.nvim",
     cmd = "Mason",
     keys = { { "<leader>cm", "<cmd>Mason<cr>", desc = "Mason" } },
-    build = ":MasonUpdate",
-    opts_extend = { "ensure_installed" },
     opts = {
       ensure_installed = {
         "stylua",
         "shfmt",
       },
     },
-    ---@param opts MasonSettings | {ensure_installed: string[]}
-    config = function(_, opts)
-      require("mason").setup(opts)
-      local mr = require("mason-registry")
-      mr:on("package:install:success", function()
-        vim.defer_fn(function()
-          -- trigger FileType event to possibly load this newly installed LSP server
-          vim.api.nvim_exec_autocmds("FileType", {
-            buffer = vim.api.nvim_get_current_buf(),
-          })
-        end, 100)
-      end)
+  },
 
-      mr.refresh(function()
-        for _, tool in ipairs(opts.ensure_installed) do
-          local p = mr.get_package(tool)
-          if not p:is_installed() and not p:is_installing() then
-            p:install()
+  -- C/C++ Extensions (inlay hints, code lens, etc.)
+  {
+    "p00f/clangd_extensions.nvim",
+    ft = { "c", "cpp", "objc", "objcpp", "cuda", "proto" },
+    opts = {
+      inlay_hints = {
+        inline = vim.fn.has("nvim-0.10") == 1,
+        only_current_line = false,
+        only_current_line_autocmd = { "CursorHold" },
+        show_parameter_hints = true,
+        parameter_hints_prefix = "<- ",
+        other_hints_prefix = "=> ",
+        max_len_align = false,
+        max_len_align_padding = 1,
+        right_align = false,
+        right_align_padding = 7,
+        highlight = "Comment",
+        priority = 100,
+      },
+      ast = {
+        role_icons = {
+          type = "",
+          declaration = "",
+          expression = "",
+          specifier = "",
+          statement = "",
+          ["template argument"] = "",
+        },
+        kind_icons = {
+          Compound = "",
+          Recovery = "",
+          TranslationUnit = "",
+          PackExpansion = "",
+          TemplateTypeParm = "",
+          TemplateTemplateParm = "",
+          TemplateParamObject = "",
+        },
+      },
+    },
+    config = function(_, opts)
+      require("clangd_extensions").setup(opts)
+
+      -- Enable inlay hints automatically
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if client and client.name == "clangd" then
+            -- Enable inlay hints if supported
+            if vim.lsp.inlay_hint then
+              vim.lsp.inlay_hint.enable(true, { bufnr = args.buf })
+            end
+          end
+        end,
+      })
+
+      -- Default config file templates
+      local default_clangd = [[
+CompileFlags:
+  Add:
+    - -Wall
+    - -Wextra
+    - -Wpedantic
+  Compiler: clang
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - modernize-*
+      - performance-*
+      - readability-*
+    Remove:
+      - modernize-use-trailing-return-type
+      - readability-identifier-length
+  UnusedIncludes: Strict
+
+InlayHints:
+  Enabled: Yes
+  ParameterNames: Yes
+  DeducedTypes: Yes
+]]
+
+      local default_clang_tidy = [[
+Checks: >
+  -*,
+  bugprone-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -modernize-use-trailing-return-type,
+  -readability-identifier-length
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: file
+]]
+
+      local default_clang_format = [[
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+AccessModifierOffset: -4
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignOperands: true
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterReturnType: None
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces: Attach
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakStringLiterals: true
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+IncludeBlocks: Regroup
+IndentCaseLabels: true
+IndentPPDirectives: AfterHash
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+PointerAlignment: Left
+ReflowComments: true
+SortIncludes: true
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInCStyleCastParentheses: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard: c++17
+]]
+
+      -- Command to generate default C/C++ config files
+      vim.api.nvim_create_user_command("ClangdConfigInit", function()
+        local root = vim.fn.getcwd()
+        local files = {
+          { name = ".clangd", content = default_clangd },
+          { name = ".clang-tidy", content = default_clang_tidy },
+          { name = ".clang-format", content = default_clang_format },
+        }
+
+        for _, file in ipairs(files) do
+          local path = root .. "/" .. file.name
+          if vim.fn.filereadable(path) == 0 then
+            local f = io.open(path, "w")
+            if f then
+              f:write(file.content)
+              f:close()
+              vim.notify("Created " .. file.name, vim.log.levels.INFO)
+            end
+          else
+            vim.notify(file.name .. " already exists, skipping", vim.log.levels.WARN)
           end
         end
-      end)
+        vim.notify("Run :LspRestart to apply new config", vim.log.levels.INFO)
+      end, { desc = "Initialize default clangd config files (.clangd, .clang-tidy, .clang-format)" })
     end,
   },
 }

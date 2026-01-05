@@ -1,101 +1,74 @@
-# Bare Minimum Neovim Configuration# Basic Neovim config using folke/lazy.nvim
+# Modern Neovim Config for C/C++/Embedded
 
+A modular, feature-rich Neovim configuration focused on C/C++, Rust, and Python development, with an "NvChad-like" aesthetic.
 
+## Features
 
-A minimal Neovim configuration with essential plugins and useful keymaps.Bootstrap:
+- **Package Management**: [lazy.nvim](https://github.com/folke/lazy.nvim)
+- **UI**: [Catppuccin](https://github.com/catppuccin/nvim) theme, [Lualine](https://github.com/nvim-lualine/lualine.nvim), [Snacks.nvim](https://github.com/folke/snacks.nvim) (Dashboard, Notifications).
+- **LSP**: Native LSP with [Mason](https://github.com/williamboman/mason.nvim) and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig).
+  - **C/C++**: `clangd` with `clangd_extensions.nvim` (AST, switching, etc.).
+  - **Rust**: `rust-analyzer`.
+  - **Python**: `pyright` + `black`/`isort`.
+- **Completion**: [blink.cmp](https://github.com/saghen/blink.cmp) (Fast, Rust-based).
+- **Formatting**: [conform.nvim](https://github.com/stevearc/conform.nvim).
+- **Linting**: [nvim-lint](https://github.com/mfussenegger/nvim-lint).
+- **Navigation**: [fzf-lua](https://github.com/ibhagwan/fzf-lua) (Files, Grep, Git), [Flash.nvim](https://github.com/folke/flash.nvim).
+- **Git**: [gitsigns](https://github.com/lewis6991/gitsigns.nvim), [Snacks Lazygit](https://github.com/folke/snacks.nvim).
+- **AI**: GitHub Copilot (Chat & Completion), Claude via [CodeCompanion](https://github.com/olimorris/codecompanion.nvim).
+- **Terminal**: Floating terminal via [ToggleTerm](https://github.com/akinsho/toggleterm.nvim) or Snacks (`<c-/>`).
 
+## Requirements
 
+Ensure the following are installed on your system:
 
-## Features1. Start Neovim. The `init.lua` will clone lazy.nvim automatically to: stdpath('data')/lazy/lazy.nvim
+- **Neovim** >= 0.9.0 (0.10+ recommended)
+- **Git**
+- **C Compiler** (gcc/clang) - for compiling treesitter parsers.
+- **Node.js & npm** - for Mason to install many servers.
+- **Ripgrep** (`rg`) - for Fzf-lua grep.
+- **Fd** (`fd`) - for Fzf-lua file search.
+- **Unzip**, **Tar**, **Wget**, **Curl** - for Mason.
+- **Clangd** - heavily recommended to have system-wide `clangd` for C++, though Mason can install it too.
 
-2. Inside Neovim run: `:Lazy sync`
-
-- **Plugin Manager**: lazy.nvim
-
-- **Colorscheme**: Tokyo Night StormIncluded plugins:
-
-- **File Explorer**: nvim-tree
-
-- **Fuzzy Finder**: Telescope- gruvbox (colorscheme)
-
-- **Syntax Highlighting**: Treesitter- lualine (statusline)
-
-- **Git Integration**: Gitsigns- telescope (fuzzy finder)
-
-- **Status Line**: Lualine- nvim-treesitter (syntax)
-
-- **Auto Pairs**: nvim-autopairs- mason (LSP tooling)
-
-- **Comment Toggling**: Comment.nvim
-
-Files:
-
-## Key Mappings
-
-- `init.lua` - main entry
-
-### Leader Key- `lua/core/options.lua` - basic options
-
-- Leader key is set to `<Space>`- `lua/core/keymaps.lua` - basic keymaps
-
-- `lua/plugins/init.lua` - plugin list for lazy.nvim
-
-### File Operations
-- `<leader>w` - Save file
-- `<leader>q` - Quit
-- `<leader>x` - Close buffer
-
-### Navigation
-- `<C-h/j/k/l>` - Window navigation
-- `<S-h/l>` - Buffer navigation (previous/next)
-- `<C-Up/Down/Left/Right>` - Resize windows
-
-### File Explorer
-- `<leader>e` - Toggle nvim-tree
-
-### Fuzzy Finding (Telescope)
-- `<leader>ff` - Find files
-- `<leader>fg` - Live grep
-- `<leader>fb` - Find buffers
-- `<leader>fh` - Help tags
-
-### Text Editing
-- `<A-j/k>` - Move lines up/down (visual mode)
-- `</>` - Indent/outdent (stays in visual mode)
-- `p` - Paste without overwriting register (visual mode)
-- `<leader>h` - Clear search highlighting
-
-### Quick Fix
-- `<leader>j` - Next quickfix item
-- `<leader>k` - Previous quickfix item
-
-### Terminal
-- `<C-h/j/k/l>` - Navigate from terminal mode
-
-### Comments
-- `gcc` - Toggle line comment
-- `gc` - Toggle comment (visual mode)
-
-## Installation
-
-1. Clone or copy this `init.lua` to your Neovim config directory
-2. Start Neovim - plugins will install automatically
-3. Restart Neovim to ensure everything loads properly
-
-## Directory Structure
+## Structure
 
 ```
-~/.config/nvim/
-├── init.lua            # Main configuration file (bootstrap and module loading)
+nvim/
+├── init.lua              # Bootstrap
 ├── lua/
-│   ├── options.lua     # Editor options and settings
-│   ├── keymaps.lua     # Basic keymaps (non-plugin)
-│   └── plugins.lua     # Plugin configurations with their keymaps
-└── README.md           # This file
+│   ├── config/           # Core config
+│   │   ├── autocmds.lua
+│   │   ├── keymaps.lua
+│   │   └── options.lua
+│   └── plugins/          # Plugins (Modular)
+│       ├── ai.lua        # Copilot, Claude
+│       ├── completion.lua# blink.cmp
+│       ├── editor.lua    # Fzf, Flash, Harpoon, Git
+│       ├── formatting.lua# Conform
+│       ├── linting.lua   # nvim-lint
+│       ├── lsp.lua       # LSP, Mason, Clangd
+│       ├── treesitter.lua# Syntax Highlighting
+│       └── ui.lua        # Theme, Dashboard, Statusline, Terminal
 ```
 
-The configuration is now modular with plugins self-contained:
-- `init.lua` - Main entry point with lazy.nvim bootstrap and module loading
-- `lua/options.lua` - All editor options and leader key settings
-- `lua/keymaps.lua` - Basic navigation and editing keymaps (non-plugin related)
-- `lua/plugins.lua` - All plugins with their configurations and keymaps in one place
+## Keymaps
+
+| Key | Description |
+| --- | --- |
+| `<space>` | Leader Key |
+| `<leader><space>` | Find Files |
+| `<leader>/` | Grep (Live) |
+| `<leader>,` | Switch Buffer |
+| `<leader>l` | Lazy Plugin Manager |
+| `<leader>gg` | Lazygit |
+| `<C-t>` | Toggle Floating Terminal |
+| `<leader>cR` | Switch Source/Header (C++) |
+| `<leader>a` | AI Actions |
+| `<leader>cc` | Copilot Chat |
+
+## Customization
+
+- **LSP**: Edit `lua/plugins/lsp.lua` to add more servers.
+- **Formatting**: Edit `lua/plugins/formatting.lua`.
+- **UI**: Edit `lua/plugins/ui.lua`.

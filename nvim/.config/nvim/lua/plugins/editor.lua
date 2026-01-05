@@ -1,231 +1,241 @@
--- Editor enhancement plugins inspired by LazyVim
 return {
-  -- Flash enhances the built-in search functionality by showing labels
-  -- at the end of each match, letting you quickly jump to a specific location
+  -- Fzf-lua
+  {
+    "ibhagwan/fzf-lua",
+    cmd = "FzfLua",
+    keys = {
+      { "<leader>,", "<cmd>FzfLua buffers<cr>", desc = "Switch Buffer" },
+      { "<leader>/", "<cmd>FzfLua live_grep<cr>", desc = "Grep (Root Dir)" },
+      { "<leader>:", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
+      { "<leader><space>", "<cmd>FzfLua files<cr>", desc = "Find Files (Root Dir)" },
+      -- find
+      { "<leader>fb", "<cmd>FzfLua buffers<cr>", desc = "Buffers" },
+      { "<leader>ff", "<cmd>FzfLua files<cr>", desc = "Find Files (Root Dir)" },
+      { "<leader>fg", "<cmd>FzfLua git_files<cr>", desc = "Find Files (git-files)" },
+      { "<leader>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent" },
+      -- git
+      { "<leader>gc", "<cmd>FzfLua git_commits<cr>", desc = "Commits" },
+      { "<leader>gs", "<cmd>FzfLua git_status<cr>", desc = "Status" },
+      -- search
+      { "<leader>s\"", "<cmd>FzfLua registers<cr>", desc = "Registers" },
+      { "<leader>sa", "<cmd>FzfLua autocmds<cr>", desc = "Auto Commands" },
+      { "<leader>sb", "<cmd>FzfLua lines<cr>", desc = "Buffer Lines" },
+      { "<leader>sc", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
+      { "<leader>sC", "<cmd>FzfLua commands<cr>", desc = "Commands" },
+      { "<leader>sd", "<cmd>FzfLua diagnostics_document<cr>", desc = "Document Diagnostics" },
+      { "<leader>sD", "<cmd>FzfLua diagnostics_workspace<cr>", desc = "Workspace Diagnostics" },
+      { "<leader>sg", "<cmd>FzfLua live_grep<cr>", desc = "Grep (Root Dir)" },
+      { "<leader>sh", "<cmd>FzfLua help_tags<cr>", desc = "Help Pages" },
+      { "<leader>sH", "<cmd>FzfLua highlights<cr>", desc = "Search Highlight Groups" },
+      { "<leader>sk", "<cmd>FzfLua keymaps<cr>", desc = "Key Maps" },
+      { "<leader>sl", "<cmd>FzfLua loclist<cr>", desc = "Location List" },
+      { "<leader>sM", "<cmd>FzfLua man_pages<cr>", desc = "Man Pages" },
+      { "<leader>sm", "<cmd>FzfLua marks<cr>", desc = "Jump to Mark" },
+      { "<leader>so", "<cmd>FzfLua vim_options<cr>", desc = "Options" },
+      { "<leader>sR", "<cmd>FzfLua resume<cr>", desc = "Resume" },
+      { "<leader>sq", "<cmd>FzfLua quickfix<cr>", desc = "Quickfix List" },
+      { "<leader>sw", "<cmd>FzfLua grep_cword<cr>", desc = "Word (Root Dir)" },
+      { "<leader>sW", "<cmd>FzfLua grep_cWORD<cr>", desc = "Word (Root Dir)" },
+      { "<leader>sw", "<cmd>FzfLua grep_visual<cr>", mode = "v", desc = "Selection (Root Dir)" },
+    },
+    opts = {
+      winopts = {
+        height = 0.90,
+        width = 0.85,
+        border = "rounded",
+        preview = {
+          default = "bat",
+          border = "border",
+          layout = "flex",
+          flip_columns = 120,
+          vertical = "down:60%",
+          horizontal = "right:50%",
+        },
+      },
+      files = {
+        prompt = "Files❯ ",
+        file_icons = true,
+        git_icons = true,
+        color_icons = true,
+      },
+      grep = {
+        prompt = "Grep❯ ",
+        input_prompt = "Grep For❯ ",
+        rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096",
+      },
+      previewers = {
+        bat = {
+          cmd = "bat",
+          args = "--style=numbers,changes --color=always",
+          theme = "Catppuccin-mocha",
+        },
+      },
+    },
+  },
+
+  -- Flash
   {
     "folke/flash.nvim",
     event = "VeryLazy",
+    vscode = true,
     opts = {},
     keys = {
-      -- Remap Flash away from 's' to avoid conflict with mini.surround
-      { "/", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash Jump" },
-      { "?", mode = { "n", "x", "o" }, function() require("flash").jump({ search = { forward = false } }) end, desc = "Flash Jump Backward" },
+      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
       { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
       { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
       { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
       { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
-      -- Flash treesitter selection under leader
-      { 
-        "<leader>fs", 
-        mode = { "n", "o", "x" },
-        function() require("flash").treesitter() end, 
-        desc = "Flash Treesitter Selection" 
-      },
     },
   },
 
-  -- which-key helps you remember key bindings by showing a popup
-  -- with the active keybindings of the command you started typing
+  -- Mini.surround
   {
-    "folke/which-key.nvim",
-    event = "VeryLazy",
+    "echasnovski/mini.surround",
+    keys = function(_, keys)
+      -- Populate the keys based on the user's options
+      local plugin = require("lazy.core.config").spec.plugins["mini.surround"]
+      local opts = require("lazy.core.plugin").values(plugin, "opts", false)
+      local mappings = {
+        { opts.mappings.add, desc = "Add surrounding", mode = { "n", "v" } },
+        { opts.mappings.delete, desc = "Delete surrounding" },
+        { opts.mappings.find, desc = "Find right surrounding" },
+        { opts.mappings.find_left, desc = "Find left surrounding" },
+        { opts.mappings.highlight, desc = "Highlight surrounding" },
+        { opts.mappings.replace, desc = "Replace surrounding" },
+        { opts.mappings.update_n_lines, desc = "Update `MiniSurround.config.n_lines`" },
+      }
+      mappings = vim.tbl_filter(function(m)
+        return m[1] and #m[1] > 0
+      end, mappings)
+      return vim.list_extend(mappings, keys)
+    end,
     opts = {
-      preset = "modern",
-      delay = 300,
-      spec = {
-        { "<leader><tab>", group = "tabs", mode = { "n", "v" } },
-        { "<leader>c", group = "code", mode = { "n", "v" } },
-        { "<leader>d", group = "debug", mode = { "n", "v" } },
-        { "<leader>f", group = "file/find", mode = { "n", "v" } },
-        { "<leader>g", group = "git", mode = { "n", "v" } },
-        { "<leader>gh", group = "hunks", mode = { "n", "v" } },
-        { "<leader>h", group = "harpoon", mode = { "n", "v" } },
-        { "<leader>q", group = "quit/session", mode = { "n", "v" } },
-        -- Remove conflicting group definitions, let which-key auto-discover
-        { "<leader>s", group = "search", mode = { "n", "v" } },
-        { "<leader>t", group = "terminal/toggle", mode = { "n", "v" } },
-        { "<leader>tc", group = "treesitter-context", mode = { "n", "v" } },
-        { "<leader>u", group = "ui", mode = { "n", "v" } },
-        { "<leader>ut", group = "ui/themes", mode = { "n", "v" } },
-        { "<leader>w", group = "windows", mode = { "n", "v" } },
-        { "<leader>x", group = "diagnostics/quickfix", mode = { "n", "v" } },
-        -- Keep essential navigation groups
-        { "[", group = "prev", mode = { "n", "v" } },
-        { "]", group = "next", mode = { "n", "v" } },
-        { "g", group = "goto", mode = { "n", "v" } },
-        { "z", group = "fold", mode = { "n", "v" } },
-      },
-      icons = {
-        breadcrumb = "»",
-        separator = "➜",
-        group = "+",
-        ellipsis = "…",
-        mappings = true,
-        rules = {},
-        colors = true,
-        keys = {
-          Up = " ",
-          Down = " ",
-          Left = " ",
-          Right = " ",
-          C = "󰘴 ",
-          M = "󰘵 ",
-          D = "󰘳 ",
-          S = "󰘶 ",
-          CR = "󰌑 ",
-          Esc = "󱊷 ",
-          ScrollWheelDown = "󱕐 ",
-          ScrollWheelUp = "󱕑 ",
-          NL = "󰌑 ",
-          BS = "󰁮",
-          Space = "󱁐 ",
-          Tab = "󰌒 ",
-          F1 = "󱊫",
-          F2 = "󱊬",
-          F3 = "󱊭",
-          F4 = "󱊮",
-          F5 = "󱊯",
-          F6 = "󱊰",
-          F7 = "󱊱",
-          F8 = "󱊲",
-          F9 = "󱊳",
-          F10 = "󱊴",
-          F11 = "󱊵",
-          F12 = "󱊶",
-        },
-      },
-      show_help = true,
-      show_keys = true,
-      disable = {
-        buftypes = {},
-        filetypes = { "TelescopePrompt" },
+      mappings = {
+        add = "sa", -- Add surrounding in Normal and Visual modes
+        delete = "sd", -- Delete surrounding
+        find = "sf", -- Find surrounding (to the right)
+        find_left = "sF", -- Find surrounding (to the left)
+        highlight = "sh", -- Highlight surrounding
+        replace = "sr", -- Replace surrounding
+        update_n_lines = "sn", -- Update `n_lines`
       },
     },
-    config = function(_, opts)
-      local wk = require("which-key")
-      wk.setup(opts)
-    end,
   },
 
-  -- Enhanced gitsigns configuration 
+  -- Harpoon
+  {
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    keys = {
+      { "<leader>H", function() require("harpoon"):list():add() end, desc = "Harpoon File" },
+      { "<leader>h", function() local harpoon = require("harpoon"); harpoon.ui:toggle_quick_menu(harpoon:list()) end, desc = "Harpoon Quick Menu" },
+      { "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon to File 1" },
+      { "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon to File 2" },
+      { "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon to File 3" },
+      { "<leader>4", function() require("harpoon"):list():select(4) end, desc = "Harpoon to File 4" },
+      { "<leader>5", function() require("harpoon"):list():select(5) end, desc = "Harpoon to File 5" },
+    },
+    opts = {},
+  },
+
+  -- Git Signs
   {
     "lewis6991/gitsigns.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    event = { "BufReadPre", "BufNewFile" },
+    event = "VeryLazy",
     opts = {
       signs = {
         add = { text = "▎" },
         change = { text = "▎" },
-        delete = { text = "" },
-        topdelete = { text = "" },
+        delete = { text = "" },
+        topdelete = { text = "" },
         changedelete = { text = "▎" },
         untracked = { text = "▎" },
       },
-      signs_staged = {
-        add = { text = "▎" },
-        change = { text = "▎" },
-        delete = { text = "" },
-        topdelete = { text = "" },
-        changedelete = { text = "▎" },
+      current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+        delay = 500,
+        ignore_whitespace = false,
       },
-      on_attach = function(buffer)
-        local gs = package.loaded.gitsigns
-
-        local function map(mode, l, r, desc)
-          vim.keymap.set(mode, l, r, { buffer = buffer, desc = desc })
-        end
-
-        -- Navigation
-        map("n", "]h", function()
-          if vim.wo.diff then
-            vim.cmd.normal({ "]c", bang = true })
-          else
-            gs.nav_hunk("next")
-          end
-        end, "Next Hunk")
-        
-        map("n", "[h", function()
-          if vim.wo.diff then
-            vim.cmd.normal({ "[c", bang = true })
-          else
-            gs.nav_hunk("prev")
-          end
-        end, "Prev Hunk")
-        
-        map("n", "]H", function() gs.nav_hunk("last") end, "Last Hunk")
-        map("n", "[H", function() gs.nav_hunk("first") end, "First Hunk")
-
-        -- Actions
-        map({ "n", "v" }, "<leader>ghs", ":Gitsigns stage_hunk<CR>", "Stage Hunk")
-        map({ "n", "v" }, "<leader>ghr", ":Gitsigns reset_hunk<CR>", "Reset Hunk")
-        map("n", "<leader>ghS", gs.stage_buffer, "Stage Buffer")
-        map("n", "<leader>ghu", gs.undo_stage_hunk, "Undo Stage Hunk")
-        map("n", "<leader>ghR", gs.reset_buffer, "Reset Buffer")
-        map("n", "<leader>ghp", gs.preview_hunk_inline, "Preview Hunk Inline")
-        map("n", "<leader>ghb", function() gs.blame_line({ full = true }) end, "Blame Line")
-        map("n", "<leader>ghB", function() gs.blame() end, "Blame Buffer")
-        map("n", "<leader>ghd", gs.diffthis, "Diff This")
-        map("n", "<leader>ghD", function() gs.diffthis("~") end, "Diff This ~")
-
-        -- Text object
-        map({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>", "GitSigns Select Hunk")
-      end,
     },
   },
 
-  -- Better diagnostics list and others
+  -- Todo comments
   {
-    "folke/trouble.nvim",
-    dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons" },
-    cmd = { "Trouble" },
-    init = function()
-      -- Disable on startup to prevent window management issues
-      vim.g.trouble_disable_on_startup = true
-    end,
-    opts = {
-      auto_close = false,
-      auto_open = false,
-      auto_preview = true,
-      auto_refresh = true,
-      auto_jump = false,
-      focus = false,
-      restore = true,
-      follow = true,
-      indent_guides = true,
-      max_items = 200,
-      multiline = true,
-      pinned = false,
-      warn_no_results = true,
-      open_no_results = false,
-      win = {
-        position = "bottom",
-        size = { height = 10 },
-        border = "single",
-      },
-      preview = {
-        type = "main",
-        scratch = true,
-      },
-      -- Add safe mode configuration
-      modes = {
-        diagnostics = {
-          auto_refresh = false,
-        },
-        lsp = {
-          auto_refresh = false,
-        },
+    "folke/todo-comments.nvim",
+    cmd = { "TodoTrouble", "TodoFzfLua" },
+    event = "VeryLazy",
+    config = true,
+    -- stylua: ignore
+    keys = {
+      { "]t", function() require("todo-comments").jump_next() end, desc = "Next Todo Comment" },
+      { "[t", function() require("todo-comments").jump_prev() end, desc = "Previous Todo Comment" },
+      { "<leader>xt", "<cmd>Trouble todo toggle<cr>", desc = "Todo (Trouble)" },
+      { "<leader>xT", "<cmd>Trouble todo toggle filter = {tag = {TODO,FIX,FIXME}}<cr>", desc = "Todo/Fix/Fixme (Trouble)" },
+      { "<leader>st", "<cmd>TodoFzfLua<cr>", desc = "Todo (fzf)" },
+      { "<leader>sT", "<cmd>TodoFzfLua keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme (fzf)" },
+    },
+  },
+
+  -- Refactoring
+  {
+    "ThePrimeagen/refactoring.nvim",
+    keys = {
+      {
+        "<leader>r",
+        function()
+          require("refactoring").select_refactor()
+        end,
+        mode = "v",
+        noremap = true,
+        silent = true,
+        expr = false,
+        desc = "Refactoring",
       },
     },
+    opts = {},
+  },
+
+  -- Trouble (better diagnostics list)
+  {
+    "folke/trouble.nvim",
+    cmd = { "Trouble", "TroubleToggle" },
+    opts = { use_diagnostic_signs = true },
     keys = {
       { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
       { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
-      { "<leader>cs", "<cmd>Trouble symbols toggle<cr>", desc = "Symbols (Trouble)" },
-      { "<leader>cS", "<cmd>Trouble lsp toggle<cr>", desc = "LSP references/definitions/... (Trouble)" },
+      { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
+      { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / References (Trouble)" },
       { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
       { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
-      -- Simplified navigation without API calls that could cause promise issues
-      { "[q", "<cmd>Trouble qflist prev<cr>", desc = "Previous Trouble/Quickfix Item" },
-      { "]q", "<cmd>Trouble qflist next<cr>", desc = "Next Trouble/Quickfix Item" },
+    },
+  },
+
+  -- Mini.bufremove (better buffer deletion)
+  {
+    "echasnovski/mini.bufremove",
+    keys = {
+      {
+        "<leader>bd",
+        function()
+          local bd = require("mini.bufremove").delete
+          if vim.bo.modified then
+            local choice = vim.fn.confirm(("Save changes to %q?"):format(vim.fn.bufname()), "&Yes\n&No\n&Cancel")
+            if choice == 1 then -- Yes
+              vim.cmd.write()
+              bd(0)
+            elseif choice == 2 then -- No
+              bd(0, true)
+            end
+          else
+            bd(0)
+          end
+        end,
+        desc = "Delete Buffer",
+      },
+      { "<leader>bD", function() require("mini.bufremove").delete(0, true) end, desc = "Delete Buffer (Force)" },
     },
   },
 }

@@ -35,4 +35,11 @@ M.kinds = {
   Variable = "󰀫",
 }
 
+M.diagnostics = {
+  Error = " ",
+  Warn = " ",
+  Hint = " ",
+  Info = " ",
+}
+
 return M

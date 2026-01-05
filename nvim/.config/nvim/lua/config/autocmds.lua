@@ -1,7 +1,4 @@
--- This file contains autocommands adapted from LazyVim
--- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
-
--- Create augroup helper function
+-- Autocmds
 local function augroup(name)
   return vim.api.nvim_create_augroup("lazyvim_" .. name, { clear = true })
 end
@@ -9,18 +6,14 @@ end
 -- Check if we need to reload the file when it changed
 vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
   group = augroup("checktime"),
-  callback = function()
-    if vim.o.buftype ~= "nofile" then
-      vim.cmd("checktime")
-    end
-  end,
+  command = "checktime",
 })
 
 -- Highlight on yank
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = augroup("highlight_yank"),
   callback = function()
-    (vim.hl or vim.highlight).on_yank()
+    vim.highlight.on_yank()
   end,
 })
 
@@ -34,7 +27,7 @@ vim.api.nvim_create_autocmd({ "VimResized" }, {
   end,
 })
 
--- Go to last location when opening a buffer
+-- Go to last loc when opening a buffer
 vim.api.nvim_create_autocmd("BufReadPost", {
   group = augroup("last_loc"),
   callback = function(event)
@@ -57,56 +50,29 @@ vim.api.nvim_create_autocmd("FileType", {
   group = augroup("close_with_q"),
   pattern = {
     "PlenaryTestPopup",
-    "checkhealth",
-    "dbout",
-    "gitsigns-blame",
-    "grug-far",
     "help",
     "lspinfo",
-    "neotest-output",
-    "neotest-output-panel",
-    "neotest-summary",
+    "man",
     "notify",
     "qf",
     "spectre_panel",
     "startuptime",
     "tsplayground",
+    "checkhealth",
   },
   callback = function(event)
     vim.bo[event.buf].buflisted = false
-    vim.keymap.set("n", "q", "<cmd>close<cr>", {
-      buffer = event.buf,
-      silent = true,
-      desc = "Quit buffer",
-    })
-  end,
-})
-
--- Make it easier to close man-files when opened inline
-vim.api.nvim_create_autocmd("FileType", {
-  group = augroup("man_unlisted"),
-  pattern = { "man" },
-  callback = function(event)
-    vim.bo[event.buf].buflisted = false
+    vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = event.buf, silent = true })
   end,
 })
 
 -- Wrap and check for spell in text filetypes
 vim.api.nvim_create_autocmd("FileType", {
   group = augroup("wrap_spell"),
-  pattern = { "text", "plaintex", "typst", "gitcommit", "markdown" },
+  pattern = { "gitcommit", "markdown" },
   callback = function()
     vim.opt_local.wrap = true
     vim.opt_local.spell = true
-  end,
-})
-
--- Fix conceallevel for json files
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  group = augroup("json_conceal"),
-  pattern = { "json", "jsonc", "json5" },
-  callback = function()
-    vim.opt_local.conceallevel = 0
   end,
 })
 
@@ -114,7 +80,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   group = augroup("auto_create_dir"),
   callback = function(event)
-    if event.match:match("^%w%w+:[\\/][\\/]") then
+    if event.match:match("^%w%w+://") then
       return
     end
     local file = vim.uv.fs_realpath(event.match) or event.match
@@ -122,52 +88,38 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
--- Terminal settings
-vim.api.nvim_create_autocmd("TermOpen", {
-  group = augroup("terminal_settings"),
-  callback = function()
-    vim.opt_local.number = false
-    vim.opt_local.relativenumber = false
-    vim.opt_local.scrolloff = 0
-    
-    -- Start in insert mode
-    vim.cmd("startinsert")
-  end,
-})
-
--- Auto-format on save (if format on save is enabled)
-vim.api.nvim_create_autocmd("BufWritePre", {
-  group = augroup("auto_format"),
-  callback = function(event)
-    -- Only format if autoformat is enabled (this matches LazyVim behavior)
-    if vim.g.autoformat ~= false and vim.b[event.buf].autoformat ~= false then
-      -- Try to format using conform.nvim if available
-      local ok, conform = pcall(require, "conform")
-      if ok then
-        conform.format({ bufnr = event.buf })
-      else
-        -- Fallback to LSP formatting
-        vim.lsp.buf.format({ bufnr = event.buf })
-      end
+-- LSP Keymaps (attached when LSP is active)
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = augroup("lsp_keymaps"),
+  callback = function(args)
+    local buffer = args.buf
+    local map = function(mode, lhs, rhs, desc)
+      vim.keymap.set(mode, lhs, rhs, { buffer = buffer, desc = desc })
     end
-  end,
-})
 
--- Show cursor line only in active window
-vim.api.nvim_create_autocmd({ "InsertLeave", "WinEnter" }, {
-  group = augroup("auto_cursorline_show"),
-  callback = function()
-    if vim.wo.cursorline then
-      vim.wo.cursorline = true
-    end
-  end,
-})
+    -- Navigation
+    map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
+    map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
+    map("n", "gI", vim.lsp.buf.implementation, "Go to Implementation")
+    map("n", "gy", vim.lsp.buf.type_definition, "Go to Type Definition")
+    map("n", "gr", vim.lsp.buf.references, "References")
+    map("n", "K", vim.lsp.buf.hover, "Hover")
+    map("n", "gK", vim.lsp.buf.signature_help, "Signature Help")
+    map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
 
-vim.api.nvim_create_autocmd({ "InsertEnter", "WinLeave" }, {
-  group = augroup("auto_cursorline_hide"),
-  callback = function()
-    if vim.wo.cursorline then
-      vim.wo.cursorline = false
-    end
+    -- Code actions
+    map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+    map("v", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
+    map("n", "<leader>cr", vim.lsp.buf.rename, "Rename")
+
+    -- Diagnostics
+    map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
+    map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
+    map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
+
+    -- Format (if no conform.nvim)
+    map({ "n", "v" }, "<leader>cf", function()
+      vim.lsp.buf.format({ async = true })
+    end, "Format")
   end,
 })

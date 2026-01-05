@@ -1,81 +1,53 @@
--- Formatting configuration with clang-format and format-on-save
 return {
-  -- Code formatting with conform.nvim
   {
     "stevearc/conform.nvim",
+    dependencies = { "mason.nvim" },
     event = { "BufWritePre" },
     cmd = { "ConformInfo" },
     keys = {
       {
-        "<leader>cf",
+        "<leader>cF",
         function()
-          require("conform").format({ async = true, lsp_fallback = true })
+          require("conform").format({ formatters = { "injected" }, timeout_ms = 3000 })
         end,
-        mode = "",
-        desc = "Format buffer",
+        mode = { "n", "v" },
+        desc = "Format Injected Langs",
       },
     },
     opts = {
-      -- Define formatters by file type
+      format_on_save = {
+        timeout_ms = 3000,
+        lsp_fallback = true,
+      },
       formatters_by_ft = {
-        c = { "clang_format" },
-        cpp = { "clang_format" },
-        objc = { "clang_format" },
-        objcpp = { "clang_format" },
-        cuda = { "clang_format" },
-        proto = { "clang_format" },
         lua = { "stylua" },
-        python = { "black" },
-        javascript = { "prettier" },
-        typescript = { "prettier" },
-        javascriptreact = { "prettier" },
-        typescriptreact = { "prettier" },
+        fish = { "fish_indent" },
+        sh = { "shfmt" },
+        python = { "isort", "black" },
+        rust = { "rustfmt" },
+        c = { "clang-format" },
+        cpp = { "clang-format" },
+        cmake = { "cmake_format" },
+        -- Use the "*" filetype to run formatters on all filetypes.
+        ["*"] = { "codespell" },
+        -- Use the "_" filetype to run formatters on filetypes that don't
+        -- have other formatters configured.
+        ["_"] = { "trim_whitespace" },
         json = { "prettier" },
         yaml = { "prettier" },
         markdown = { "prettier" },
-        html = { "prettier" },
-        css = { "prettier" },
-        scss = { "prettier" },
-        sh = { "shfmt" },
-        bash = { "shfmt" },
-        zsh = { "shfmt" },
+        toml = { "taplo" },
       },
-      -- Format on save configuration
-      format_on_save = {
-        -- These options will be passed to conform.format()
-        timeout_ms = 500,
-        lsp_fallback = true,
-      },
-      -- Custom formatter configurations
       formatters = {
-        clang_format = {
-          command = "clang-format",
-          args = { "--style=file", "--fallback-style=LLVM" },
-          stdin = true,
-        },
-        stylua = {
-          prepend_args = { "--config-path", vim.fn.expand("~/.stylua.toml") },
+        injected = { options = { ignore_errors = true } },
+        -- Deal with clang-format
+        ["clang-format"] = {
+          prepend_args = { "--style=file" },
         },
       },
     },
     init = function()
-      -- If you want to use format-on-save, you can optionally set a vim option
       vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-    end,
-  },
-
-  -- Mason tool installer for formatters
-  {
-    "williamboman/mason.nvim",
-    opts = function(_, opts)
-      opts.ensure_installed = opts.ensure_installed or {}
-      vim.list_extend(opts.ensure_installed, {
-        "clang-format",
-        "stylua",
-        "prettier",
-        "black",
-        "shfmt",
-      })
     end,
   },
 }
