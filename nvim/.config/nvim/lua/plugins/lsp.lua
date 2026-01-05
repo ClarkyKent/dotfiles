@@ -162,7 +162,24 @@ return {
         pyright = {
           cmd = { "pyright-langserver", "--stdio" },
           filetypes = { "python" },
-          root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json", ".git" },
+          root_markers = { "pyproject.toml", "uv.lock", "setup.py", "setup.cfg", "requirements.txt", "Pipfile", "pyrightconfig.json", ".git" },
+        },
+        mesonlsp = {
+          cmd = { "mesonlsp", "--lsp" },
+          filetypes = { "meson" },
+          root_markers = { "meson.build", "meson_options.txt", "meson.options", ".git" },
+        },
+        esbonio = {
+          cmd = { "esbonio" },
+          filetypes = { "rst" },
+          root_markers = { "conf.py", "setup.py", "pyproject.toml", ".git" },
+          settings = {
+            esbonio = {
+              sphinx = {
+                buildDir = "${workspaceRoot}/_build",
+              },
+            },
+          },
         },
       },
       setup = {
@@ -194,13 +211,17 @@ return {
           "json-lsp",
           "yaml-language-server",
           "cmake-language-server",
-          "marksman",
+          "marksman", -- Markdown LSP
           "rust-analyzer",
           "pyright",
-          "black", -- Python formatter
-          "isort", -- Python formatter
+          "ruff", -- Python formatter + linter (replaces black, isort, flake8)
+          "esbonio", -- RST/Sphinx LSP
+          "rstcheck", -- RST linter
+          "markdownlint", -- Markdown linter
           "shfmt", -- Shell formatter
           "shellcheck", -- Shell linter
+          "prettier", -- JSON/YAML/Markdown formatter
+          "taplo", -- TOML formatter
         }
         for _, tool in ipairs(packages) do
           local p = mr.get_package(tool)

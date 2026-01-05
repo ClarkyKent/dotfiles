@@ -23,13 +23,11 @@ return {
         lua = { "stylua" },
         fish = { "fish_indent" },
         sh = { "shfmt" },
-        python = { "isort", "black" },
+        python = { "ruff_format", "ruff_organize_imports" },
         rust = { "rustfmt" },
         c = { "clang-format" },
         cpp = { "clang-format" },
         cmake = { "cmake_format" },
-        -- Use the "*" filetype to run formatters on all filetypes.
-        ["*"] = { "codespell" },
         -- Use the "_" filetype to run formatters on filetypes that don't
         -- have other formatters configured.
         ["_"] = { "trim_whitespace" },
@@ -37,6 +35,7 @@ return {
         yaml = { "prettier" },
         markdown = { "prettier" },
         toml = { "taplo" },
+        meson = { lsp_format = "prefer" }, -- mesonlsp provides formatting
       },
       formatters = {
         injected = { options = { ignore_errors = true } },

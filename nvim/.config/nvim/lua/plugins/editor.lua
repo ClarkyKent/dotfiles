@@ -3,14 +3,27 @@ return {
   {
     "ibhagwan/fzf-lua",
     cmd = "FzfLua",
+    init = function()
+      -- Define project root finder globally (available before plugin loads)
+      _G.fzf_get_root = function()
+        local path = vim.api.nvim_buf_get_name(0)
+        path = path ~= "" and vim.uv.fs_realpath(path) or nil
+        local roots = path and vim.fs.find({ ".git", "Makefile", "meson.build", "Cargo.toml", "pyproject.toml", "package.json" }, {
+          path = path,
+          upward = true,
+        }) or {}
+        return roots[1] and vim.fs.dirname(roots[1]) or vim.uv.cwd()
+      end
+    end,
     keys = {
       { "<leader>,", "<cmd>FzfLua buffers<cr>", desc = "Switch Buffer" },
-      { "<leader>/", "<cmd>FzfLua live_grep<cr>", desc = "Grep (Root Dir)" },
+      { "<leader>/", function() require("fzf-lua").live_grep({ cwd = _G.fzf_get_root() }) end, desc = "Grep (Root Dir)" },
       { "<leader>:", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
-      { "<leader><space>", "<cmd>FzfLua files<cr>", desc = "Find Files (Root Dir)" },
+      { "<leader><space>", function() require("fzf-lua").files({ cwd = _G.fzf_get_root() }) end, desc = "Find Files (Root Dir)" },
       -- find
       { "<leader>fb", "<cmd>FzfLua buffers<cr>", desc = "Buffers" },
-      { "<leader>ff", "<cmd>FzfLua files<cr>", desc = "Find Files (Root Dir)" },
+      { "<leader>ff", function() require("fzf-lua").files({ cwd = _G.fzf_get_root() }) end, desc = "Find Files (Root Dir)" },
+      { "<leader>fF", function() require("fzf-lua").files({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Find Files (Cwd)" },
       { "<leader>fg", "<cmd>FzfLua git_files<cr>", desc = "Find Files (git-files)" },
       { "<leader>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent" },
       -- git
@@ -24,7 +37,8 @@ return {
       { "<leader>sC", "<cmd>FzfLua commands<cr>", desc = "Commands" },
       { "<leader>sd", "<cmd>FzfLua diagnostics_document<cr>", desc = "Document Diagnostics" },
       { "<leader>sD", "<cmd>FzfLua diagnostics_workspace<cr>", desc = "Workspace Diagnostics" },
-      { "<leader>sg", "<cmd>FzfLua live_grep<cr>", desc = "Grep (Root Dir)" },
+      { "<leader>sg", function() require("fzf-lua").live_grep({ cwd = _G.fzf_get_root() }) end, desc = "Grep (Root Dir)" },
+      { "<leader>sG", function() require("fzf-lua").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep (Cwd)" },
       { "<leader>sh", "<cmd>FzfLua help_tags<cr>", desc = "Help Pages" },
       { "<leader>sH", "<cmd>FzfLua highlights<cr>", desc = "Search Highlight Groups" },
       { "<leader>sk", "<cmd>FzfLua keymaps<cr>", desc = "Key Maps" },
@@ -34,38 +48,287 @@ return {
       { "<leader>so", "<cmd>FzfLua vim_options<cr>", desc = "Options" },
       { "<leader>sR", "<cmd>FzfLua resume<cr>", desc = "Resume" },
       { "<leader>sq", "<cmd>FzfLua quickfix<cr>", desc = "Quickfix List" },
-      { "<leader>sw", "<cmd>FzfLua grep_cword<cr>", desc = "Word (Root Dir)" },
-      { "<leader>sW", "<cmd>FzfLua grep_cWORD<cr>", desc = "Word (Root Dir)" },
-      { "<leader>sw", "<cmd>FzfLua grep_visual<cr>", mode = "v", desc = "Selection (Root Dir)" },
+      { "<leader>sw", function() require("fzf-lua").grep_cword({ cwd = _G.fzf_get_root() }) end, desc = "Word (Root Dir)" },
+      { "<leader>sW", function() require("fzf-lua").grep_cword({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Word (Cwd)" },
+      { "<leader>sw", function() require("fzf-lua").grep_visual({ cwd = _G.fzf_get_root() }) end, mode = "v", desc = "Selection (Root Dir)" },
+      { "<leader>sW", function() require("fzf-lua").grep_visual({ cwd = vim.fn.expand("%:p:h") }) end, mode = "v", desc = "Selection (Cwd)" },
+      { "<leader>s*", "<cmd>FzfLua lgrep_curbuf<cr>", desc = "Word in Buffer" },
     },
     opts = {
+      -- Global fzf colors (Catppuccin-inspired)
+      fzf_colors = {
+        ["fg"] = { "fg", "CursorLine" },
+        ["bg"] = { "bg", "Normal" },
+        ["hl"] = { "fg", "Comment" },
+        ["fg+"] = { "fg", "Normal" },
+        ["bg+"] = { "bg", "CursorLine" },
+        ["hl+"] = { "fg", "Statement" },
+        ["info"] = { "fg", "PreProc" },
+        ["prompt"] = { "fg", "Conditional" },
+        ["pointer"] = { "fg", "Exception" },
+        ["marker"] = { "fg", "Keyword" },
+        ["spinner"] = { "fg", "Label" },
+        ["header"] = { "fg", "Comment" },
+        ["gutter"] = { "bg", "Normal" },
+        ["separator"] = { "fg", "Comment" },
+      },
+      fzf_opts = {
+        ["--ansi"] = true,
+        ["--info"] = "inline-right",
+        ["--layout"] = "reverse",
+        ["--marker"] = "▏",
+        ["--pointer"] = "▌",
+        ["--prompt"] = " ",
+        ["--separator"] = "─",
+        ["--scrollbar"] = "▐",
+        ["--ellipsis"] = "…",
+      },
       winopts = {
-        height = 0.90,
-        width = 0.85,
+        height = 0.85,
+        width = 0.80,
+        row = 0.35,
+        col = 0.50,
         border = "rounded",
+        backdrop = 60,
+        title = " FZF ",
+        title_pos = "center",
         preview = {
           default = "bat",
           border = "border",
           layout = "flex",
-          flip_columns = 120,
-          vertical = "down:60%",
-          horizontal = "right:50%",
+          flip_columns = 130,
+          vertical = "down:55%",
+          horizontal = "right:55%",
+          title = true,
+          title_pos = "center",
+          scrollbar = "float",
+          delay = 50,
+          winopts = {
+            number = true,
+            relativenumber = false,
+            cursorline = true,
+            cursorlineopt = "both",
+            signcolumn = "no",
+          },
+        },
+        on_create = function()
+          vim.keymap.set("t", "<C-j>", "<Down>", { silent = true, buffer = true })
+          vim.keymap.set("t", "<C-k>", "<Up>", { silent = true, buffer = true })
+        end,
+      },
+      keymap = {
+        builtin = {
+          ["<F1>"] = "toggle-help",
+          ["<F2>"] = "toggle-fullscreen",
+          ["<F3>"] = "toggle-preview-wrap",
+          ["<F4>"] = "toggle-preview",
+          ["<C-d>"] = "preview-page-down",
+          ["<C-u>"] = "preview-page-up",
+        },
+        fzf = {
+          ["ctrl-z"] = "abort",
+          ["ctrl-a"] = "toggle-all",
+          ["ctrl-q"] = "select-all+accept",
+          ["ctrl-d"] = "preview-page-down",
+          ["ctrl-u"] = "preview-page-up",
         },
       },
       files = {
-        prompt = "Files❯ ",
+        prompt = "  ",
+        cwd_prompt = false,
         file_icons = true,
         git_icons = true,
         color_icons = true,
+        find_opts = [[-type f -not -path '*/\.git/*' -printf '%P\n']],
+        fd_opts = [[--color=never --type f --hidden --follow --exclude .git]],
+        actions = {
+          ["ctrl-g"] = false,
+        },
+        winopts = {
+          title = "  Files ",
+          title_pos = "center",
+        },
+      },
+      buffers = {
+        prompt = " 󰈙 ",
+        file_icons = true,
+        color_icons = true,
+        sort_lastused = true,
+        winopts = {
+          title = " 󰈙 Buffers ",
+          title_pos = "center",
+        },
       },
       grep = {
-        prompt = "Grep❯ ",
-        input_prompt = "Grep For❯ ",
-        rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096",
+        prompt = "  ",
+        input_prompt = "  Grep: ",
+        rg_opts = "--column --line-number --no-heading --color=always --smart-case --max-columns=4096 -e",
+        rg_glob = true,
+        glob_flag = "--iglob",
+        glob_separator = "%s%-%-",
+        winopts = {
+          title = "  Grep ",
+          title_pos = "center",
+        },
+      },
+      lsp = {
+        prompt_postfix = " ",
+        symbols = {
+          prompt = " 󰅪 ",
+          symbol_icons = {
+            File = "󰈙",
+            Module = "",
+            Namespace = "󰦮",
+            Package = "",
+            Class = "󰆧",
+            Method = "󰊕",
+            Property = "",
+            Field = "",
+            Constructor = "",
+            Enum = "",
+            Interface = "",
+            Function = "󰊕",
+            Variable = "󰀫",
+            Constant = "󰏿",
+            String = "",
+            Number = "󰎠",
+            Boolean = "󰨙",
+            Array = "󱡠",
+            Object = "",
+            Key = "󰌋",
+            Null = "󰟢",
+            EnumMember = "",
+            Struct = "󰆼",
+            Event = "",
+            Operator = "󰆕",
+            TypeParameter = "󰗴",
+          },
+        },
+        code_actions = {
+          prompt = " 󰌵 ",
+          winopts = {
+            title = " 󰌵 Code Actions ",
+            title_pos = "center",
+          },
+        },
+      },
+      diagnostics = {
+        prompt = " 󰒡 ",
+        winopts = {
+          title = " 󰒡 Diagnostics ",
+          title_pos = "center",
+        },
+      },
+      oldfiles = {
+        prompt = "  ",
+        winopts = {
+          title = "  Recent Files ",
+          title_pos = "center",
+        },
+      },
+      quickfix = {
+        prompt = " 󰁨 ",
+        winopts = {
+          title = " 󰁨 Quickfix ",
+          title_pos = "center",
+        },
+      },
+      loclist = {
+        prompt = " 󰒡 ",
+        winopts = {
+          title = " 󰒡 Location List ",
+          title_pos = "center",
+        },
+      },
+      git = {
+        files = {
+          prompt = " 󰊢 ",
+          winopts = {
+            title = " 󰊢 Git Files ",
+            title_pos = "center",
+          },
+        },
+        status = {
+          prompt = " 󰊢 ",
+          winopts = {
+            title = " 󰊢 Git Status ",
+            title_pos = "center",
+          },
+        },
+        commits = {
+          prompt = "  ",
+          winopts = {
+            title = "  Git Commits ",
+            title_pos = "center",
+          },
+        },
+        bcommits = {
+          prompt = "  ",
+          winopts = {
+            title = "  Buffer Commits ",
+            title_pos = "center",
+          },
+        },
+        branches = {
+          prompt = "  ",
+          winopts = {
+            title = "  Git Branches ",
+            title_pos = "center",
+          },
+        },
+      },
+      helptags = {
+        prompt = " 󰋖 ",
+        winopts = {
+          title = " 󰋖 Help ",
+          title_pos = "center",
+        },
+      },
+      keymaps = {
+        prompt = "  ",
+        winopts = {
+          title = "  Keymaps ",
+          title_pos = "center",
+        },
+      },
+      marks = {
+        prompt = " 󰃀 ",
+        winopts = {
+          title = " 󰃀 Marks ",
+          title_pos = "center",
+        },
+      },
+      registers = {
+        prompt = " 󰅍 ",
+        winopts = {
+          title = " 󰅍 Registers ",
+          title_pos = "center",
+        },
+      },
+      commands = {
+        prompt = "  ",
+        winopts = {
+          title = "  Commands ",
+          title_pos = "center",
+        },
+      },
+      command_history = {
+        prompt = "  ",
+        winopts = {
+          title = "  Command History ",
+          title_pos = "center",
+        },
+      },
+      search_history = {
+        prompt = "  ",
+        winopts = {
+          title = "  Search History ",
+          title_pos = "center",
+        },
       },
       previewers = {
         bat = {
-          cmd = "bat",
+          cmd = vim.fn.executable("bat") == 1 and "bat" or "batcat",
           args = "--style=numbers,changes --color=always",
           theme = "Catppuccin-mocha",
         },

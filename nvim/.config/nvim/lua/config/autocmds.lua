@@ -88,6 +88,16 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
+-- Enable spell checking for documentation files
+vim.api.nvim_create_autocmd("FileType", {
+  group = augroup("spell_check"),
+  pattern = { "markdown", "rst", "text", "gitcommit" },
+  callback = function()
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = "en_us"
+  end,
+})
+
 -- LSP Keymaps (attached when LSP is active)
 vim.api.nvim_create_autocmd("LspAttach", {
   group = augroup("lsp_keymaps"),
@@ -121,5 +131,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map({ "n", "v" }, "<leader>cf", function()
       vim.lsp.buf.format({ async = true })
     end, "Format")
+
+    -- Toggle inlay hints
+    if vim.lsp.inlay_hint then
+      map("n", "<leader>uh", function()
+        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = buffer }), { bufnr = buffer })
+      end, "Toggle Inlay Hints")
+    end
   end,
 })

@@ -6,10 +6,11 @@ return {
       -- Event to trigger linters
       events = { "BufWritePost", "BufReadPost", "InsertLeave" },
       linters_by_ft = {
-        python = { "flake8" },
+        python = { "ruff" },
         sh = { "shellcheck" },
         dockerfile = { "hadolint" },
         markdown = { "markdownlint" },
+        rst = { "rstcheck" },
         json = { "jsonlint" },
         yaml = { "yamllint" },
         cmake = { "cmakelint" },

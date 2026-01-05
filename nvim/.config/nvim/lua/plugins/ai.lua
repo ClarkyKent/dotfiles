@@ -20,12 +20,12 @@ return {
     },
     opts = {
       debug = false,
-      -- Available models (GitHub Copilot)
-      -- GPT: gpt-4o, gpt-4.1, gpt-4
-      -- Claude: claude-opus-4.5, claude-sonnet-4, claude-3.7-sonnet, claude-3.5-sonnet
-      -- Gemini: gemini-2.5-pro, gemini-2.0-flash
-      -- Reasoning: o1, o3-mini, o4-mini
-      model = "claude-sonnet-4", -- Default model
+      -- Available models (GitHub Copilot) - use :CopilotChatModels to see available
+      -- Claude: claude-sonnet-4.5, claude-sonnet-4, claude-opus-4.5, claude-opus-4.1, claude-haiku-4.5
+      -- GPT: gpt-5.2, gpt-5.1, gpt-5.1-codex*, gpt-5, gpt-5-codex, gpt-5-mini, gpt-4.1
+      -- Gemini: gemini-3-pro, gemini-3-flash, gemini-2.5-pro
+      -- Other: grok-code-fast-1, raptor-mini
+      model = "claude-sonnet-4.5", -- Default model
       -- Agent mode configuration
       agent = "copilot", -- Default agent
 
@@ -120,22 +120,30 @@ return {
         "<leader>cm",
         function()
           local models = {
-            -- Claude
-            "claude-opus-4.5",
+            -- Anthropic Claude
+            "claude-sonnet-4.5",
             "claude-sonnet-4",
-            "claude-3.7-sonnet",
-            "claude-3.5-sonnet",
-            -- GPT
+            "claude-opus-4.5",
+            "claude-opus-4.1",
+            "claude-haiku-4.5",
+            -- OpenAI GPT
+            "gpt-5.2",
+            "gpt-5.1",
+            "gpt-5.1-codex",
+            "gpt-5.1-codex-mini",
+            "gpt-5.1-codex-max",
+            "gpt-5",
+            "gpt-5-codex",
+            "gpt-5-mini",
             "gpt-4.1",
-            "gpt-4o",
-            "gpt-4",
-            -- Gemini
+            -- Google Gemini
+            "gemini-3-pro",
+            "gemini-3-flash",
             "gemini-2.5-pro",
-            "gemini-2.0-flash",
-            -- Reasoning
-            "o4-mini",
-            "o3-mini",
-            "o1",
+            -- xAI
+            "grok-code-fast-1",
+            -- Fine-tuned
+            "raptor-mini",
           }
           vim.ui.select(models, { prompt = "Select Copilot Model:" }, function(choice)
             if choice then
@@ -152,8 +160,9 @@ return {
         "<leader>ca",
         function()
           local agents = {
-            "copilot",
-            "codebase", -- Understands your codebase context
+            "copilot",      -- Default tool-calling agent (file reading, git, search)
+            "codebase",     -- Understands codebase context
+            "perplexityai", -- Web search agent (requires extension)
           }
           vim.ui.select(agents, { prompt = "Select Agent:" }, function(choice)
             if choice then
@@ -215,10 +224,15 @@ return {
         nargs = "?",
         complete = function()
           return {
-            "claude-opus-4.5", "claude-sonnet-4", "claude-3.7-sonnet", "claude-3.5-sonnet",
-            "gpt-4.1", "gpt-4o", "gpt-4",
-            "gemini-2.5-pro", "gemini-2.0-flash",
-            "o4-mini", "o3-mini", "o1",
+            -- Anthropic Claude
+            "claude-sonnet-4.5", "claude-sonnet-4", "claude-opus-4.5", "claude-opus-4.1", "claude-haiku-4.5",
+            -- OpenAI GPT
+            "gpt-5.2", "gpt-5.1", "gpt-5.1-codex", "gpt-5.1-codex-mini", "gpt-5.1-codex-max",
+            "gpt-5", "gpt-5-codex", "gpt-5-mini", "gpt-4.1",
+            -- Google Gemini
+            "gemini-3-pro", "gemini-3-flash", "gemini-2.5-pro",
+            -- xAI & Fine-tuned
+            "grok-code-fast-1", "raptor-mini",
           }
         end,
         desc = "Set Copilot Chat model",
