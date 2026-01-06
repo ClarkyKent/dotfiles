@@ -8,11 +8,16 @@ return {
       _G.fzf_get_root = function()
         local path = vim.api.nvim_buf_get_name(0)
         path = path ~= "" and vim.uv.fs_realpath(path) or nil
-        local roots = path and vim.fs.find({ ".git", "Makefile", "meson.build", "Cargo.toml", "pyproject.toml", "package.json" }, {
-          path = path,
+        local search_path = path or vim.uv.cwd()
+
+        local root = vim.fs.find(".git", { path = search_path, upward = true })[1]
+        if root then return vim.fs.dirname(root) end
+
+        root = vim.fs.find({ "Makefile", "meson.build", "Cargo.toml", "pyproject.toml", "package.json" }, {
+          path = search_path,
           upward = true,
-        }) or {}
-        return roots[1] and vim.fs.dirname(roots[1]) or vim.uv.cwd()
+        })[1]
+        return root and vim.fs.dirname(root) or vim.uv.cwd()
       end
     end,
     keys = {
@@ -93,7 +98,7 @@ return {
         title = " FZF ",
         title_pos = "center",
         preview = {
-          default = "bat",
+          default = "builtin",
           border = "border",
           layout = "flex",
           flip_columns = 130,
@@ -324,13 +329,6 @@ return {
         winopts = {
           title = "  Search History ",
           title_pos = "center",
-        },
-      },
-      previewers = {
-        bat = {
-          cmd = vim.fn.executable("bat") == 1 and "bat" or "batcat",
-          args = "--style=numbers,changes --color=always",
-          theme = "Catppuccin-mocha",
         },
       },
     },

@@ -35,13 +35,29 @@ return {
         yaml = { "prettier" },
         markdown = { "prettier" },
         toml = { "taplo" },
-        meson = { lsp_format = "prefer" }, -- mesonlsp provides formatting
+        meson = { "meson_format", lsp_format = "fallback" },
       },
       formatters = {
         injected = { options = { ignore_errors = true } },
         -- Deal with clang-format
         ["clang-format"] = {
           prepend_args = { "--style=file" },
+        },
+        meson_format = {
+          command = "meson",
+          args = function(self, ctx)
+            local args = { "format", "-i" }
+            -- Look for meson.format config file
+            local config_file = vim.fn.findfile("meson.format", ctx.dirname .. ";")
+            if config_file ~= "" then
+              table.insert(args, "-c")
+              table.insert(args, config_file)
+            end
+            table.insert(args, "$FILENAME")
+            return args
+          end,
+          stdin = false,
+          tempfile_format = ".meson.build",
         },
       },
     },

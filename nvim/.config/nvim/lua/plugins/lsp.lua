@@ -222,6 +222,7 @@ return {
           "shellcheck", -- Shell linter
           "prettier", -- JSON/YAML/Markdown formatter
           "taplo", -- TOML formatter
+          -- "muon", -- Meson formatter (install manually: https://github.com/gerardo-di-iaca/muon)
         }
         for _, tool in ipairs(packages) do
           local p = mr.get_package(tool)

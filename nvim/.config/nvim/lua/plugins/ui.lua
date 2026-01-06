@@ -1,19 +1,4 @@
 return {
-  -- Which-key
-  {
-    "folke/which-key.nvim",
-    event = "VeryLazy",
-    init = function()
-      vim.o.timeout = true
-      vim.o.timeoutlen = 300
-    end,
-    opts = {
-      -- your configuration comes here
-      -- or leave it empty to use the default settings
-      -- refer to the configuration section below
-    },
-  },
-
   -- Navic (Breadcrumbs)
   {
     "SmiteshP/nvim-navic",
@@ -399,14 +384,21 @@ return {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
+    init = function()
+      vim.o.timeout = true
+      vim.o.timeoutlen = 300
+    end,
     opts = {
       preset = "modern",
       plugins = { spelling = true },
       spec = {
+        { "<leader>a", group = "ai", icon = " " },
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code" },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
+        { "<leader>h", group = "harpoon" },
+        { "<leader>m", group = "markdown", icon = " " },
         { "<leader>s", group = "search" },
         { "<leader>u", group = "ui" },
         { "<leader>w", group = "windows" },
