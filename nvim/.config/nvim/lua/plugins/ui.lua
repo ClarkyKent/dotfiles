@@ -392,7 +392,6 @@ return {
       preset = "modern",
       plugins = { spelling = true },
       spec = {
-        { "<leader>a", group = "ai", icon = " " },
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code" },
         { "<leader>f", group = "file/find" },

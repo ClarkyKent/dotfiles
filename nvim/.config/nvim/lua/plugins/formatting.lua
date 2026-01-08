@@ -57,7 +57,7 @@ return {
             return args
           end,
           stdin = false,
-          tempfile_format = ".meson.build",
+          tempfile_format = ".XXXXXX.meson.build",
         },
       },
     },
