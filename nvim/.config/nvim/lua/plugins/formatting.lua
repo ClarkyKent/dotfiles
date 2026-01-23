@@ -44,7 +44,20 @@ return {
           prepend_args = { "--style=file" },
         },
         meson_format = {
-          command = "meson",
+          command = function(self, ctx)
+            -- Attempt to find local meson in venv
+            local roots = { ".venv", "venv", "env" }
+            for _, root in ipairs(roots) do
+              local venv = vim.fn.finddir(root, ctx.dirname .. ";")
+              if venv ~= "" then
+                local candidate = venv .. "/bin/meson"
+                if vim.fn.executable(candidate) == 1 then
+                  return candidate
+                end
+              end
+            end
+            return "meson"
+          end,
           args = function(self, ctx)
             local args = { "format", "-i" }
             -- Look for meson.format config file
@@ -58,6 +71,36 @@ return {
           end,
           stdin = false,
           tempfile_format = ".XXXXXX.meson.build",
+        },
+        ruff_format = {
+          command = function(self, ctx)
+            local roots = { ".venv", "venv", "env" }
+            for _, root in ipairs(roots) do
+              local venv = vim.fn.finddir(root, ctx.dirname .. ";")
+              if venv ~= "" then
+                local candidate = venv .. "/bin/ruff"
+                if vim.fn.executable(candidate) == 1 then
+                  return candidate
+                end
+              end
+            end
+            return "ruff"
+          end,
+        },
+        ruff_organize_imports = {
+          command = function(self, ctx)
+            local roots = { ".venv", "venv", "env" }
+            for _, root in ipairs(roots) do
+              local venv = vim.fn.finddir(root, ctx.dirname .. ";")
+              if venv ~= "" then
+                local candidate = venv .. "/bin/ruff"
+                if vim.fn.executable(candidate) == 1 then
+                  return candidate
+                end
+              end
+            end
+            return "ruff"
+          end,
         },
       },
     },

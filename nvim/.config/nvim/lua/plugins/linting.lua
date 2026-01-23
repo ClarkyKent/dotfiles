@@ -52,6 +52,25 @@ return {
           return linter and not (type(linter) == "table" and linter.condition and not linter.condition(ctx))
         end, names)
 
+        -- Dynamic resolution for ruff
+        if vim.tbl_contains(names, "ruff") then
+          local roots = { ".venv", "venv", "env" }
+          local found_ruff = "ruff"
+          for _, root in ipairs(roots) do
+            local venv = vim.fn.finddir(root, ctx.dirname .. ";")
+            if venv ~= "" then
+              local candidate = venv .. "/bin/ruff"
+              if vim.fn.executable(candidate) == 1 then
+                found_ruff = candidate
+                break
+              end
+            end
+          end
+          if lint.linters.ruff then
+            lint.linters.ruff.cmd = found_ruff
+          end
+        end
+
         if #names > 0 then
           lint.try_lint(names)
         end
