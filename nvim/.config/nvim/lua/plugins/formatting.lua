@@ -59,7 +59,7 @@ return {
             return "meson"
           end,
           args = function(self, ctx)
-            local args = { "format", "-i" }
+            local args = { "format", "-i", "-e" }
             -- Look for meson.format config file
             local config_file = vim.fn.findfile("meson.format", ctx.dirname .. ";")
             if config_file ~= "" then
