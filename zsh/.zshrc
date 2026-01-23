@@ -1,16 +1,47 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.# Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
+
+# === Missing tools notification system ===
+typeset -ga __missing_tools=()
+
+_check_tool() {
+    local tool=$1
+    local install_hint=$2
+    if ! command -v "$tool" &>/dev/null; then
+        __missing_tools+=("$tool|$install_hint")
+        return 1
+    fi
+    return 0
+}
+
+_show_missing_tools() {
+    if [[ ${#__missing_tools[@]} -gt 0 ]]; then
+        print -P "\n%F{yellow}⚠ Missing tools detected:%f"
+        for entry in "${__missing_tools[@]}"; do
+            local tool="${entry%%|*}"
+            local hint="${entry#*|}"
+            print -P "  %F{red}•%f $tool %F{8}($hint)%f"
+        done
+        print ""
+        __missing_tools=()
+        add-zsh-hook -d precmd _show_missing_tools
+    fi
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook precmd _show_missing_tools
 
 if [[ -f "/opt/homebrew/bin/brew" ]] then
   # If you're using macOS, you'll want this enabled
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+if [[ -x "/home/linuxbrew/.linuxbrew/bin/brew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
 export PATH="$PATH:$HOME/.local/bin"
 # Set the directory we want to store zinit and plugins
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
@@ -18,7 +49,7 @@ ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 # Download Zinit, if it's not there yet
 if [ ! -d "$ZINIT_HOME" ]; then
    mkdir -p "$(dirname $ZINIT_HOME)"
-   git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+   git clone --quiet https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
 fi
 
 # Source/Load zinit
@@ -73,6 +104,10 @@ zstyle ':completion:*' menu no
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
+# Check tools used in aliases
+_check_tool eza "brew install eza"
+_check_tool nvim "brew install neovim"
+
 # Aliases: editor
 alias e="$EDITOR"
 alias E="sudo -e"
@@ -108,14 +143,23 @@ alias c='clear'
 # alias cat='batcat'
 
 # Shell integrations
-eval "$(fzf --zsh)"
-eval "$(zoxide init --cmd cd zsh)"
+_check_tool fzf "brew install fzf" && eval "$(fzf --zsh)"
+_check_tool zoxide "brew install zoxide" && eval "$(zoxide init --cmd cd zsh)"
+_check_tool direnv "brew install direnv" && eval "$(direnv hook zsh)"
 
-eval "$(direnv hook zsh)"
+if [[ -e /home/quara/.nix-profile/etc/profile.d/nix.sh ]]; then
+    . /home/quara/.nix-profile/etc/profile.d/nix.sh
+fi
 
-if [ -e /home/quara/.nix-profile/etc/profile.d/nix.sh ]; then . /home/quara/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
-# export PATH="/home/linuxbrew/.linuxbrew/opt/clang-format/bin:$PATH"
-# export PATH="/home/quara/.cargo/bin:$PATH"
+if [[ -f /home/quara/.config/broot/launcher/bash/br ]]; then
+    source /home/quara/.config/broot/launcher/bash/br
+else
+    __missing_tools+=("broot|brew install broot && broot --install")
+fi
+export ZED_ALLOW_EMULATED_GPU=1
+alias zed="WAYLAND_DISPLAY= zed"
 
-source /home/quara/.config/broot/launcher/bash/br
-export PATH="/home/linuxbrew/.linuxbrew/opt/llvm@19/bin:$PATH"
+# opencode
+export PATH=/home/quara/.opencode/bin:$PATH
+
+GITSTATUS_LOG_LEVEL=DEBUG

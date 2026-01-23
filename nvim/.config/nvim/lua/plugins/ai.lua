@@ -69,18 +69,8 @@ return {
       -- ═══════════════════════════════════════════════════════════════════
       -- Agent Mode (like VS Code Copilot Agent)
       -- ═══════════════════════════════════════════════════════════════════
-      { "<leader>ag", function()
-          vim.cmd("CodeCompanionChat")
-          vim.defer_fn(function()
-            vim.api.nvim_feedkeys("@agent ", "n", false)
-          end, 100)
-        end, desc = "AI Agent Mode" },
-      { "<leader>aw", function()
-          vim.cmd("CodeCompanionChat")
-          vim.defer_fn(function()
-            vim.api.nvim_feedkeys("@workspace ", "n", false)
-          end, 100)
-        end, desc = "AI Workspace Context" },
+      { "<leader>ag", "<cmd>CodeCompanionChat @agent<cr>", desc = "AI Agent Mode" },
+      { "<leader>aw", "<cmd>CodeCompanionChat @workspace<cr>", desc = "AI Workspace Context" },
 
       -- ═══════════════════════════════════════════════════════════════════
       -- Quick Prompts (Visual Mode)
@@ -191,22 +181,10 @@ return {
               opts = { provider = "telescope" },
             },
           },
-          keymaps = {
-            close = { modes = { n = "q", i = "<C-c>" } },
-            stop = { modes = { n = "<C-c>" } },
-            send = { modes = { n = "<CR>", i = "<C-s>" } },
-            regenerate = { modes = { n = "gr" } },
-            pin = { modes = { n = "gp" } },
-            next_chat = { modes = { n = "]]" } },
-            previous_chat = { modes = { n = "[[" } },
-          },
+          -- Use default keymaps from plugin
         },
         inline = {
           adapter = "copilot",
-          keymaps = {
-            accept_change = { modes = { n = "ga" }, desc = "Accept change" },
-            reject_change = { modes = { n = "gr" }, desc = "Reject change" },
-          },
         },
         -- Agent mode configuration
         agent = {
