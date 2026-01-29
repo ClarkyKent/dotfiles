@@ -9,7 +9,7 @@ return {
         python = { "ruff" },
         sh = { "shellcheck" },
         dockerfile = { "hadolint" },
-        markdown = { "markdownlint" },
+        markdown = { "markdownlint-cli2" },
         rst = { "rstcheck" },
         json = { "jsonlint" },
         yaml = { "yamllint" },
@@ -48,8 +48,14 @@ return {
           local linter = lint.linters[name]
           if not linter then
             vim.notify("Linter not found: " .. name, vim.log.levels.WARN)
+            return false
           end
-          return linter and not (type(linter) == "table" and linter.condition and not linter.condition(ctx))
+          -- Check if the linter command is executable
+          local cmd = type(linter) == "table" and linter.cmd or linter
+          if vim.fn.executable(cmd) == 0 then
+            return false
+          end
+          return not (type(linter) == "table" and linter.condition and not linter.condition(ctx))
         end, names)
 
         -- Dynamic resolution for ruff
@@ -80,6 +86,35 @@ return {
         group = vim.api.nvim_create_augroup("nvim-lint", { clear = true }),
         callback = M.debounce(100, M.lint),
       })
+
+      -- Command to generate default markdownlint-cli2 config
+      vim.api.nvim_create_user_command("MarkdownlintInit", function()
+        local root = vim.fn.getcwd()
+        local file = ".markdownlint-cli2.yaml"
+        local path = root .. "/" .. file
+        local content = [[# .markdownlint-cli2.yaml
+config:
+  default: true
+  line-length: false
+  no-duplicate-heading: { siblings_only: true }
+  no-inline-html: false
+
+globs:
+  - "**/*.md"
+  - "!.git"
+  - "!node_modules"
+]]
+        if vim.fn.filereadable(path) == 0 then
+          local f = io.open(path, "w")
+          if f then
+            f:write(content)
+            f:close()
+            vim.notify("Created " .. file, vim.log.levels.INFO)
+          end
+        else
+          vim.notify(file .. " already exists", vim.log.levels.WARN)
+        end
+      end, { desc = "Initialize default markdownlint-cli2 config" })
     end,
   },
 }

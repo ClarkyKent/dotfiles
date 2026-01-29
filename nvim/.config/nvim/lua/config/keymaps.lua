@@ -20,10 +20,18 @@ map("n", "<C-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase window w
 -- Move Lines
 map("n", "<A-j>", "<cmd>m .+1<cr>==", { desc = "Move down" })
 map("n", "<A-k>", "<cmd>m .-2<cr>==", { desc = "Move up" })
+map("n", "<A-h>", "<<", { desc = "Move left" })
+map("n", "<A-l>", ">>", { desc = "Move right" })
+
 map("i", "<A-j>", "<esc><cmd>m .+1<cr>==gi", { desc = "Move down" })
 map("i", "<A-k>", "<esc><cmd>m .-2<cr>==gi", { desc = "Move up" })
+map("i", "<A-h>", "<esc><<ig", { desc = "Move left" })
+map("i", "<A-l>", "<esc>>>ig", { desc = "Move right" })
+
 map("v", "<A-j>", ":m '>+1<cr>gv=gv", { desc = "Move down" })
 map("v", "<A-k>", ":m '<-2<cr>gv=gv", { desc = "Move up" })
+map("v", "<A-h>", "<gv", { desc = "Move left" })
+map("v", "<A-l>", ">gv", { desc = "Move right" })
 
 -- Buffers
 map("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev buffer" })
