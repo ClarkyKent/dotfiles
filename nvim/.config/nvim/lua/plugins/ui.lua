@@ -26,46 +26,77 @@ return {
     end,
   },
 
-  -- Colorscheme - OneDark (NvChad style)
+  -- Colorscheme - Kanagawa
   {
-    "navarasu/onedark.nvim",
+    "rebelot/kanagawa.nvim",
     priority = 1000,
     opts = {
-      style = 'dark', -- Options: dark, darker, cool, deep, warm, warmer
-      transparent = false,
-      term_colors = true,
-      ending_tildes = false,
-      cmp_itemkind_reverse = false,
-
-      -- Change code style
-      code_style = {
-        comments = 'italic',
-        keywords = 'none',
-        functions = 'none',
-        strings = 'none',
-        variables = 'none'
+      compile = false,             -- enable compiling the colorscheme
+      undercurl = true,            -- enable undercurls
+      commentStyle = { italic = true },
+      functionStyle = {},
+      keywordStyle = { italic = true},
+      statementStyle = { bold = true },
+      typeStyle = {},
+      transparent = false,         -- do not set background color
+      dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
+      terminalColors = true,       -- define vim.g.terminal_color_{0,17}
+      colors = {                   -- add/modify theme and palette colors
+        palette = {},
+        theme = { wave = {}, lotus = {}, dragon = {}, all = {} },
       },
-
-      -- Lualine options
-      lualine = {
-        transparent = false,
-      },
-
-      -- Custom highlights
-      colors = {}, -- Override default colors
-      highlights = {}, -- Override highlight groups
-
-      -- Plugins Config
-      diagnostics = {
-        darker = true,
-        undercurl = true,
-        background = true,
+      overrides = function(colors) -- add/modify highlights
+        return {}
+      end,
+      theme = "wave",              -- Load "wave" theme when 'background' option is not set
+      background = {               -- map the value of 'background' option to a theme
+        dark = "wave",           -- try "dragon" !
+        light = "lotus"
       },
     },
     config = function(_, opts)
-      require('onedark').setup(opts)
-      require('onedark').load()
+      require('kanagawa').setup(opts)
+      require('kanagawa').load()
     end,
+  },
+
+  -- Zen Mode
+  {
+    "folke/zen-mode.nvim",
+    cmd = "ZenMode",
+    opts = {
+      plugins = {
+        gitsigns = { enabled = true },
+        tmux = { enabled = true },
+        twilight = { enabled = true },
+      },
+    },
+    keys = {
+      { "<leader>uz", function() 
+          require("zen-mode").toggle() 
+          local state = false
+          for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_get_config(win).relative ~= "" then
+              -- check if zen window is open
+            end
+          end
+          -- Zen mode doesn't have a simple is_enabled, but we'll use the notification
+          require("config.util").toggle_fn("Zen Mode", function() return true end, true)
+        end, desc = "Zen Mode" },
+    },
+  },
+
+  -- Twilight (dim inactive portions of code)
+  {
+    "folke/twilight.nvim",
+    cmd = "Twilight",
+    opts = {},
+    keys = {
+      { "<leader>uw", function() 
+          require("twilight").toggle()
+          require("config.util").toggle_fn("Twilight", function() return require("twilight").is_enabled() end, false)
+        end, desc = "Twilight" },
+    },
   },
 
   -- Better `vim.notify`
@@ -370,13 +401,19 @@ return {
     opts = { mode = "cursor", max_lines = 3 },
     keys = {
       {
-        "<leader>ut",
+        "<leader>uC",
         function()
           local tsc = require("treesitter-context")
           tsc.toggle()
+          require("config.util").toggle_fn("Treesitter Context", function() return true end, true)
         end,
         desc = "Toggle Treesitter Context",
       },
+      { "<leader>ul", function() require("config.util").toggle("number") end, desc = "Line Numbers" },
+      { "<leader>uL", function() require("config.util").toggle("relativenumber") end, desc = "Relative Numbers" },
+      { "<leader>ud", function() require("config.util").toggle_diagnostics() end, desc = "Inline Diagnostics" },
+      { "<leader>us", function() require("config.util").toggle("spell") end, desc = "Spelling" },
+      { "<leader>ub", function() require("config.util").toggle("background", false, {"light", "dark"}) end, desc = "Background (Light/Dark)" },
     },
   },
 
@@ -445,16 +482,16 @@ return {
     event = { "BufReadPost", "BufNewFile" },
     opts = {
       handle = {
-        color = "#3e4451", -- OneDark gray
+        color = nil, -- Use theme default
       },
       marks = {
         Cursor = { text = "•" },
-        Search = { color = "#61afef" }, -- OneDark blue
-        Error = { color = "#e86671" }, -- OneDark red
-        Warn = { color = "#e5c07b" }, -- OneDark yellow
-        Info = { color = "#56b6c2" }, -- OneDark cyan
-        Hint = { color = "#98c379" }, -- OneDark green
-        Misc = { color = "#c678dd" }, -- OneDark purple
+        Search = { color = nil },
+        Error = { color = nil },
+        Warn = { color = nil },
+        Info = { color = nil },
+        Hint = { color = nil },
+        Misc = { color = nil },
       },
       handlers = {
         gitsigns = true,

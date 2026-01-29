@@ -53,6 +53,7 @@ return {
       { "<leader>so", "<cmd>FzfLua vim_options<cr>", desc = "Options" },
       { "<leader>sR", "<cmd>FzfLua resume<cr>", desc = "Resume" },
       { "<leader>sq", "<cmd>FzfLua quickfix<cr>", desc = "Quickfix List" },
+      { "<leader>ss", "<cmd>FzfLua lsp_document_symbols<cr>", desc = "Document Symbols" },
       { "<leader>sw", function() require("fzf-lua").grep_cword({ cwd = _G.fzf_get_root() }) end, desc = "Word (Root Dir)" },
       { "<leader>sW", function() require("fzf-lua").grep_cword({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Word (Cwd)" },
       { "<leader>sw", function() require("fzf-lua").grep_visual({ cwd = _G.fzf_get_root() }) end, mode = "v", desc = "Selection (Root Dir)" },

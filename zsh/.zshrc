@@ -163,3 +163,4 @@ alias zed="WAYLAND_DISPLAY= zed"
 export PATH=/home/quara/.opencode/bin:$PATH
 
 GITSTATUS_LOG_LEVEL=DEBUG
+autoload -U compinit; compinit

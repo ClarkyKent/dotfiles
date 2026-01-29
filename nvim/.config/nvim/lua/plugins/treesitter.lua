@@ -12,7 +12,7 @@ return {
         "json", "jsonc", "lua", "luadoc", "luap", "markdown",
         "markdown_inline", "python", "query", "regex", "toml",
         "tsx", "typescript", "vim", "vimdoc", "yaml", "rust",
-        "cmake", "make", "rst", "ninja", "meson",
+        "cmake", "make", "rst", "ninja", "meson", "robot",
       }
 
       -- Install parsers asynchronously

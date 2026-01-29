@@ -28,21 +28,23 @@ return {
           spacing = 4,
           source = "if_many",
           prefix = function(diagnostic)
-            local icons = {
-              [vim.diagnostic.severity.ERROR] = " ",
-              [vim.diagnostic.severity.WARN] = " ",
-              [vim.diagnostic.severity.HINT] = " ",
-              [vim.diagnostic.severity.INFO] = " ",
+            local icons = require("config.icons").diagnostics
+            local severity = vim.diagnostic.severity
+            local map = {
+              [severity.ERROR] = icons.Error,
+              [severity.WARN] = icons.Warn,
+              [severity.HINT] = icons.Hint,
+              [severity.INFO] = icons.Info,
             }
-            return icons[diagnostic.severity] or "●"
+            return map[diagnostic.severity] or "●"
           end,
         },
         signs = {
           text = {
-            [vim.diagnostic.severity.ERROR] = " ",
-            [vim.diagnostic.severity.WARN] = " ",
-            [vim.diagnostic.severity.HINT] = " ",
-            [vim.diagnostic.severity.INFO] = " ",
+            [vim.diagnostic.severity.ERROR] = require("config.icons").diagnostics.Error,
+            [vim.diagnostic.severity.WARN] = require("config.icons").diagnostics.Warn,
+            [vim.diagnostic.severity.HINT] = require("config.icons").diagnostics.Hint,
+            [vim.diagnostic.severity.INFO] = require("config.icons").diagnostics.Info,
           },
         },
         float = {
@@ -121,6 +123,18 @@ return {
           cmd = { "yaml-language-server", "--stdio" },
           filetypes = { "yaml", "yaml.docker-compose" },
           root_markers = { ".git" },
+          settings = {
+            yaml = {
+              schemas = {
+                ["https://raw.githubusercontent.com/microsoft/azure-pipelines-vscode/master/service-schema.json"] = "azure-pipelines.yml",
+              },
+            },
+          },
+        },
+        robotframework_ls = {
+          cmd = { "robotframework_ls" },
+          filetypes = { "robot", "resource" },
+          root_markers = { ".git", "robot.yaml" },
         },
         cmake = {
           cmd = { "cmake-language-server" },
@@ -200,42 +214,9 @@ return {
       if not string.find(vim.env.PATH or "", mason_bin) then
         vim.env.PATH = mason_bin .. ":" .. vim.env.PATH
       end
-      local mr = require("mason-registry")
-      local function ensure_installed()
-        local packages = {
-          "clangd",
-          "clang-format",
-          "codelldb", -- Debugger for C/C++/Rust
-          "bash-language-server",
-          "dockerfile-language-server",
-          "json-lsp",
-          "yaml-language-server",
-          "cmake-language-server",
-          "marksman", -- Markdown LSP
-          "rust-analyzer",
-          "pyright",
-          "ruff", -- Python formatter + linter (replaces black, isort, flake8)
-          "esbonio", -- RST/Sphinx LSP
-          "rstcheck", -- RST linter
-          "markdownlint", -- Markdown linter
-          "shfmt", -- Shell formatter
-          "shellcheck", -- Shell linter
-          "prettier", -- JSON/YAML/Markdown formatter
-          "taplo", -- TOML formatter
-          -- "muon", -- Meson formatter (install manually: https://github.com/gerardo-di-iaca/muon)
-        }
-        for _, tool in ipairs(packages) do
-          local p = mr.get_package(tool)
-          if not p:is_installed() then
-            p:install()
-          end
-        end
-      end
-      if mr.refresh then
-        mr.refresh(ensure_installed)
-      else
-        ensure_installed()
-      end
+      
+      -- Note: Automatic installation via Mason is disabled per user preference.
+      -- Packages should be provided by the environment (devbox/nix) or installed manually.
 
       -- Setup Servers
       local servers = opts.servers
