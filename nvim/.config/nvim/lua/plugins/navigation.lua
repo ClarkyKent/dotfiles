@@ -4,7 +4,7 @@ return {
     "stevearc/aerial.nvim",
     cmd = "AerialToggle",
     keys = {
-      { "<leader>cs", "<cmd>AerialToggle<cr>", desc = "Aerial (Symbols)" },
+      { "<leader>co", "<cmd>AerialToggle<cr>", desc = "Code Outline (Aerial)" },
       { "<leader>cn", "<cmd>AerialNavToggle<cr>", desc = "Aerial Nav" },
     },
     opts = {
@@ -92,11 +92,12 @@ return {
   {
     "dnlhc/glance.nvim",
     cmd = "Glance",
+    -- gpX = "peek" variants that don't conflict with buffer-local LSP keymaps (gd/gr/gy/gI)
     keys = {
-      { "gd", "<cmd>Glance definitions<cr>", desc = "Glance Definitions" },
-      { "gr", "<cmd>Glance references<cr>", desc = "Glance References" },
-      { "gy", "<cmd>Glance type_definitions<cr>", desc = "Glance Type Definitions" },
-      { "gI", "<cmd>Glance implementations<cr>", desc = "Glance Implementations" },
+      { "gpd", "<cmd>Glance definitions<cr>", desc = "Peek Definitions" },
+      { "gpr", "<cmd>Glance references<cr>", desc = "Peek References" },
+      { "gpy", "<cmd>Glance type_definitions<cr>", desc = "Peek Type Definitions" },
+      { "gpI", "<cmd>Glance implementations<cr>", desc = "Peek Implementations" },
     },
     opts = {
       height = 18,

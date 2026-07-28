@@ -1,23 +1,37 @@
 return {
   -- Navic (Breadcrumbs)
+  -- Previously configured but never rendered anywhere -- no winbar component,
+  -- not referenced by lualine. It is now drawn in the winbar.
   {
     "SmiteshP/nvim-navic",
     lazy = true,
     init = function()
       vim.g.navic_silence = true
       vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("navic_attach", { clear = true }),
         callback = function(args)
           local buffer = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
-          if client and client.supports_method("textDocument/documentSymbol") then
-            require("nvim-navic").attach(client, buffer)
+          if not (client and client:supports_method("textDocument/documentSymbol")) then
+            return
           end
+          require("nvim-navic").attach(client, buffer)
+
+          -- Only draw a winbar in real, listed file windows.
+          if
+            vim.bo[buffer].buftype ~= ""
+            or vim.bo[buffer].filetype == ""
+            or vim.api.nvim_win_get_config(0).relative ~= ""
+          then
+            return
+          end
+          vim.wo.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
         end,
       })
     end,
     opts = function()
       return {
-        separator = " ",
+        separator = "  ",
         highlight = true,
         depth_limit = 5,
         icons = require("config.icons").kinds,
@@ -31,32 +45,32 @@ return {
     "rebelot/kanagawa.nvim",
     priority = 1000,
     opts = {
-      compile = false,             -- enable compiling the colorscheme
-      undercurl = true,            -- enable undercurls
+      compile = false, -- enable compiling the colorscheme
+      undercurl = true, -- enable undercurls
       commentStyle = { italic = true },
       functionStyle = {},
-      keywordStyle = { italic = true},
+      keywordStyle = { italic = true },
       statementStyle = { bold = true },
       typeStyle = {},
-      transparent = false,         -- do not set background color
-      dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
-      terminalColors = true,       -- define vim.g.terminal_color_{0,17}
-      colors = {                   -- add/modify theme and palette colors
+      transparent = false, -- do not set background color
+      dimInactive = false, -- dim inactive window `:h hl-NormalNC`
+      terminalColors = true, -- define vim.g.terminal_color_{0,17}
+      colors = { -- add/modify theme and palette colors
         palette = {},
         theme = { wave = {}, lotus = {}, dragon = {}, all = {} },
       },
       overrides = function(colors) -- add/modify highlights
         return {}
       end,
-      theme = "wave",              -- Load "wave" theme when 'background' option is not set
-      background = {               -- map the value of 'background' option to a theme
-        dark = "wave",           -- try "dragon" !
-        light = "lotus"
+      theme = "wave", -- Load "wave" theme when 'background' option is not set
+      background = { -- map the value of 'background' option to a theme
+        dark = "wave", -- try "dragon" !
+        light = "lotus",
       },
     },
     config = function(_, opts)
-      require('kanagawa').setup(opts)
-      require('kanagawa').load()
+      require("kanagawa").setup(opts)
+      require("kanagawa").load()
     end,
   },
 
@@ -72,45 +86,29 @@ return {
       },
     },
     keys = {
-      { "<leader>uz", function() 
-          require("zen-mode").toggle() 
-          local state = false
-          for _, win in ipairs(vim.api.nvim_list_wins()) do
-            if vim.api.nvim_win_get_config(win).relative ~= "" then
-              -- check if zen window is open
-            end
-          end
-          -- Zen mode doesn't have a simple is_enabled, but we'll use the notification
-          require("config.util").toggle_fn("Zen Mode", function() return true end, true)
-        end, desc = "Zen Mode" },
+      { "<leader>uz", "<cmd>ZenMode<cr>", desc = "Zen Mode" },
     },
   },
 
   -- Twilight (dim inactive portions of code)
+  -- NOTE: twilight exposes no `is_enabled()`; the previous wrapper called it
+  -- unconditionally and threw. `:Twilight` already toggles and reports state.
   {
     "folke/twilight.nvim",
     cmd = "Twilight",
     opts = {},
     keys = {
-      { "<leader>uw", function() 
-          require("twilight").toggle()
-          require("config.util").toggle_fn("Twilight", function() return require("twilight").is_enabled() end, false)
-        end, desc = "Twilight" },
+      { "<leader>uw", "<cmd>Twilight<cr>", desc = "Twilight (dim inactive code)" },
     },
   },
 
-  -- Better `vim.notify`
+  -- Notifications are owned by snacks.notifier (see the snacks spec below).
+  -- nvim-notify remains installed only because noice.nvim can route to it,
+  -- but it must not register its own `<leader>un` -- that collided with
+  -- Snacks.notifier.hide and the winning binding was load-order dependent.
   {
     "rcarriga/nvim-notify",
-    keys = {
-      {
-        "<leader>un",
-        function()
-          require("notify").dismiss({ silent = true, pending = true })
-        end,
-        desc = "Dismiss all Notifications",
-      },
-    },
+    lazy = true,
     opts = {
       timeout = 3000,
       max_height = function()
@@ -157,15 +155,26 @@ return {
             { "filename", path = 1, symbols = { modified = "  ", readonly = "", unnamed = "" } },
           },
           lualine_x = {
-             {
-              function() return require("noice").api.status.command.get() end,
-              cond = function() return package.loaded["noice"] and require("noice").api.status.command.has() end,
+            {
+              function()
+                return require("noice").api.status.command.get()
+              end,
+              cond = function()
+                return package.loaded["noice"] and require("noice").api.status.command.has()
+              end,
             },
             {
-              function() return require("noice").api.status.mode.get() end,
-              cond = function() return package.loaded["noice"] and require("noice").api.status.mode.has() end,
+              function()
+                return require("noice").api.status.mode.get()
+              end,
+              cond = function()
+                return package.loaded["noice"] and require("noice").api.status.mode.has()
+              end,
             },
-            { "diff", symbols = { added = icons.git.added, modified = icons.git.modified, removed = icons.git.removed } },
+            {
+              "diff",
+              symbols = { added = icons.git.added, modified = icons.git.modified, removed = icons.git.removed },
+            },
           },
           lualine_y = {
             { "progress", separator = " ", padding = { left = 1, right = 0 } },
@@ -199,8 +208,12 @@ return {
     },
     opts = {
       options = {
-        close_command = function(n) require("mini.bufremove").delete(n, false) end,
-        right_mouse_command = function(n) require("mini.bufremove").delete(n, false) end,
+        close_command = function(n)
+          require("mini.bufremove").delete(n, false)
+        end,
+        right_mouse_command = function(n)
+          require("mini.bufremove").delete(n, false)
+        end,
         diagnostics = "nvim_lsp",
         always_show_bufferline = false,
         diagnostics_indicator = function(_, _, diag)
@@ -214,14 +227,6 @@ return {
     },
     config = function(_, opts)
       require("bufferline").setup(opts)
-      -- Fix bufferline when restoring a session
-      vim.api.nvim_create_autocmd("BufAdd", {
-        callback = function()
-          vim.schedule(function()
-            pcall(nvim_bufferline)
-          end)
-        end,
-      })
     end,
   },
 
@@ -262,7 +267,7 @@ return {
       "rcarriga/nvim-notify",
     },
   },
-  
+
   -- Dashboard
   {
     "folke/snacks.nvim",
@@ -280,18 +285,90 @@ return {
       words = { enabled = true },
     },
     keys = {
-      { "<leader>.",  function() Snacks.scratch() end, desc = "Toggle Scratch Buffer" },
-      { "<leader>S",  function() Snacks.scratch.select() end, desc = "Select Scratch Buffer" },
-      { "<leader>n",  function() Snacks.notifier.show_history() end, desc = "Notification History" },
-      { "<leader>cR", function() Snacks.rename.rename_file() end, desc = "Rename File" },
-      { "<leader>gB", function() Snacks.gitbrowse() end, desc = "Git Browse" },
-      { "<leader>gb", function() Snacks.git.blame_line() end, desc = "Git Blame Line" },
-      { "<leader>gf", function() Snacks.lazygit.log_file() end, desc = "Lazygit Current File History" },
-      { "<leader>gg", function() Snacks.lazygit() end, desc = "Lazygit" },
-      { "<leader>gl", function() Snacks.lazygit.log() end, desc = "Lazygit Log (CWD)" },
-      { "<leader>un", function() Snacks.notifier.hide() end, desc = "Dismiss All Notifications" },
-      { "<c-/>",      function() Snacks.terminal() end, desc = "Toggle Terminal" },
-      { "<c-_>",      function() Snacks.terminal() end, desc = "which_key_ignore" },
+      {
+        "<leader>.",
+        function()
+          Snacks.scratch()
+        end,
+        desc = "Toggle Scratch Buffer",
+      },
+      {
+        "<leader>S",
+        function()
+          Snacks.scratch.select()
+        end,
+        desc = "Select Scratch Buffer",
+      },
+      {
+        "<leader>n",
+        function()
+          Snacks.notifier.show_history()
+        end,
+        desc = "Notification History",
+      },
+      {
+        "<leader>cR",
+        function()
+          Snacks.rename.rename_file()
+        end,
+        desc = "Rename File",
+      },
+      {
+        "<leader>gB",
+        function()
+          Snacks.gitbrowse()
+        end,
+        desc = "Git Browse",
+      },
+      {
+        "<leader>gb",
+        function()
+          Snacks.git.blame_line()
+        end,
+        desc = "Git Blame Line",
+      },
+      {
+        "<leader>gf",
+        function()
+          Snacks.lazygit.log_file()
+        end,
+        desc = "Lazygit Current File History",
+      },
+      {
+        "<leader>gg",
+        function()
+          Snacks.lazygit()
+        end,
+        desc = "Lazygit",
+      },
+      {
+        "<leader>gl",
+        function()
+          Snacks.lazygit.log()
+        end,
+        desc = "Lazygit Log (CWD)",
+      },
+      {
+        "<leader>un",
+        function()
+          Snacks.notifier.hide()
+        end,
+        desc = "Dismiss All Notifications",
+      },
+      {
+        "<c-/>",
+        function()
+          Snacks.terminal()
+        end,
+        desc = "Toggle Terminal",
+      },
+      {
+        "<c-_>",
+        function()
+          Snacks.terminal()
+        end,
+        desc = "which_key_ignore",
+      },
     },
   },
 
@@ -354,7 +431,7 @@ return {
       },
     },
   },
-  
+
   -- Icons
   { "nvim-tree/nvim-web-devicons", lazy = true },
 
@@ -392,8 +469,6 @@ return {
     },
   },
 
-
-
   -- Treesitter context (sticky function headers)
   {
     "nvim-treesitter/nvim-treesitter-context",
@@ -405,15 +480,47 @@ return {
         function()
           local tsc = require("treesitter-context")
           tsc.toggle()
-          require("config.util").toggle_fn("Treesitter Context", function() return true end, true)
+          require("config.util").toggle_fn("Treesitter Context", function()
+            return true
+          end, true)
         end,
         desc = "Toggle Treesitter Context",
       },
-      { "<leader>ul", function() require("config.util").toggle("number") end, desc = "Line Numbers" },
-      { "<leader>uL", function() require("config.util").toggle("relativenumber") end, desc = "Relative Numbers" },
-      { "<leader>ud", function() require("config.util").toggle_diagnostics() end, desc = "Inline Diagnostics" },
-      { "<leader>us", function() require("config.util").toggle("spell") end, desc = "Spelling" },
-      { "<leader>ub", function() require("config.util").toggle("background", false, {"light", "dark"}) end, desc = "Background (Light/Dark)" },
+      {
+        "<leader>ul",
+        function()
+          require("config.util").toggle("number")
+        end,
+        desc = "Line Numbers",
+      },
+      {
+        "<leader>uL",
+        function()
+          require("config.util").toggle("relativenumber")
+        end,
+        desc = "Relative Numbers",
+      },
+      {
+        "<leader>ud",
+        function()
+          require("config.util").toggle_diagnostics()
+        end,
+        desc = "Inline Diagnostics",
+      },
+      {
+        "<leader>us",
+        function()
+          require("config.util").toggle("spell")
+        end,
+        desc = "Spelling",
+      },
+      {
+        "<leader>ub",
+        function()
+          require("config.util").toggle("background", false, { "light", "dark" })
+        end,
+        desc = "Background (Light/Dark)",
+      },
     },
   },
 
@@ -429,51 +536,40 @@ return {
       preset = "modern",
       plugins = { spelling = true },
       spec = {
+        { "<leader>a", group = "ai", icon = " " },
         { "<leader>b", group = "buffer" },
         { "<leader>c", group = "code" },
+        { "<leader>d", group = "debug", icon = " " },
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
+        { "<leader>gx", group = "conflict" },
         { "<leader>h", group = "harpoon" },
+        -- <leader>m is markdown only now; the CMake build bindings that used
+        -- to squat here were removed along with cmake-tools.nvim.
         { "<leader>m", group = "markdown", icon = " " },
+        { "<leader>o", group = "tasks/overseer", icon = "󰭻 " },
+        { "<leader>q", group = "sessions" },
+        { "<leader>r", group = "refactor" },
         { "<leader>s", group = "search" },
-        { "<leader>u", group = "ui" },
+        { "<leader>t", group = "test/coverage", icon = "󰙨 " },
+        { "<leader>u", group = "ui/toggle" },
         { "<leader>w", group = "windows" },
         { "<leader>x", group = "diagnostics/quickfix" },
         { "<leader><tab>", group = "tabs" },
         { "[", group = "prev" },
         { "]", group = "next" },
         { "g", group = "goto" },
+        { "gs", group = "surround" },
+        { "gp", group = "peek" },
       },
     },
   },
 
-  -- Indent guides
+  -- Indent guides are owned by snacks.indent (see the snacks spec).
+  -- indent-blankline was rendering a second set of guides on top of it.
   {
     "lukas-reineke/indent-blankline.nvim",
-    main = "ibl",
-    event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      indent = {
-        char = "│",
-        tab_char = "│",
-      },
-      scope = { enabled = false },
-      exclude = {
-        filetypes = {
-          "help",
-          "alpha",
-          "dashboard",
-          "neo-tree",
-          "Trouble",
-          "trouble",
-          "lazy",
-          "mason",
-          "notify",
-          "toggleterm",
-          "lazyterm",
-        },
-      },
-    },
+    enabled = false,
   },
 
   -- Scrollbar with diagnostics
@@ -500,55 +596,11 @@ return {
     },
   },
 
-  -- Better vim.ui.select and vim.ui.input
+  -- vim.ui.select / vim.ui.input are owned by snacks (input) and fzf-lua
+  -- (select, registered in lua/plugins/project.lua). dressing.nvim was a third
+  -- provider racing the other two for the same override.
   {
     "stevearc/dressing.nvim",
-    lazy = true,
-    init = function()
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.ui.select = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.select(...)
-      end
-      ---@diagnostic disable-next-line: duplicate-set-field
-      vim.ui.input = function(...)
-        require("lazy").load({ plugins = { "dressing.nvim" } })
-        return vim.ui.input(...)
-      end
-    end,
-    opts = {
-      input = {
-        enabled = true,
-        default_prompt = "Input:",
-        prompt_align = "left",
-        insert_only = true,
-        start_in_insert = true,
-        border = "rounded",
-        relative = "cursor",
-        prefer_width = 40,
-        max_width = nil,
-        min_width = 20,
-        win_options = {
-          winblend = 0,
-        },
-      },
-      select = {
-        enabled = true,
-        backend = { "fzf_lua", "builtin", "nui" },
-        builtin = {
-          border = "rounded",
-          relative = "editor",
-          win_options = {
-            winblend = 0,
-          },
-        },
-        fzf_lua = {
-          winopts = {
-            height = 0.5,
-            width = 0.5,
-          },
-        },
-      },
-    },
+    enabled = false,
   },
 }

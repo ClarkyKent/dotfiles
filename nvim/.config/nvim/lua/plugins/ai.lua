@@ -12,26 +12,26 @@ return {
         auto_trigger = true,
         debounce = 75,
         keymap = {
-          accept = "<M-l>",        -- Alt+l to accept suggestion
-          accept_word = "<M-k>",   -- Alt+k to accept word
-          accept_line = "<M-j>",   -- Alt+j to accept line
-          next = "<M-]>",          -- Alt+] for next suggestion
-          prev = "<M-[>",          -- Alt+[ for previous suggestion
-          dismiss = "<C-]>",       -- Ctrl+] to dismiss
+          accept = "<M-l>", -- Alt+l to accept suggestion
+          accept_word = "<M-k>", -- Alt+k to accept word
+          accept_line = "<M-j>", -- Alt+j to accept line
+          next = "<M-]>", -- Alt+] for next suggestion
+          prev = "<M-[>", -- Alt+[ for previous suggestion
+          dismiss = "<C-]>", -- Ctrl+] to dismiss
         },
       },
       panel = {
         enabled = true,
         auto_refresh = true,
         keymap = {
-          open = "<M-CR>",         -- Alt+Enter to open panel
+          open = "<M-CR>", -- Alt+Enter to open panel
         },
       },
       filetypes = {
         yaml = true,
         markdown = true,
         gitcommit = true,
-        ["*"] = true,              -- Enable for all filetypes
+        ["*"] = true, -- Enable for all filetypes
       },
     },
   },
@@ -44,10 +44,7 @@ return {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
       "zbirenbaum/copilot.lua",
-      { "stevearc/dressing.nvim", opts = {} },
       { "folke/which-key.nvim", optional = true },
-      -- For agent file operations
-      { "nvim-telescope/telescope.nvim", optional = true },
     },
     event = "VeryLazy",
     cmd = { "CodeCompanion", "CodeCompanionChat", "CodeCompanionActions", "CodeCompanionCmd" },
@@ -69,32 +66,89 @@ return {
       -- ═══════════════════════════════════════════════════════════════════
       -- Agent Mode (like VS Code Copilot Agent)
       -- ═══════════════════════════════════════════════════════════════════
-      { "<leader>ag", "<cmd>CodeCompanionChat @agent<cr>", desc = "AI Agent Mode" },
+      { "<leader>ag", "<cmd>CodeCompanionChat /agent<cr>", desc = "AI Agent Mode" },
       { "<leader>aw", "<cmd>CodeCompanionChat @workspace<cr>", desc = "AI Workspace Context" },
 
       -- ═══════════════════════════════════════════════════════════════════
       -- Quick Prompts (Visual Mode)
       -- ═══════════════════════════════════════════════════════════════════
-      { "<leader>ae", function() require("codecompanion").prompt("Explain") end, mode = "v", desc = "AI Explain" },
-      { "<leader>af", function() require("codecompanion").prompt("Fix") end, mode = "v", desc = "AI Fix" },
-      { "<leader>at", function() require("codecompanion").prompt("Tests") end, mode = "v", desc = "AI Generate Tests" },
-      { "<leader>ad", function() require("codecompanion").prompt("Document") end, mode = "v", desc = "AI Generate Docs" },
-      { "<leader>ar", function() require("codecompanion").prompt("Refactor") end, mode = "v", desc = "AI Refactor" },
-      { "<leader>ao", function() require("codecompanion").prompt("Optimize") end, mode = "v", desc = "AI Optimize" },
-      { "<leader>av", function() require("codecompanion").prompt("Review") end, mode = "v", desc = "AI Code Review" },
+      {
+        "<leader>ae",
+        function()
+          require("codecompanion").prompt("Explain")
+        end,
+        mode = "v",
+        desc = "AI Explain",
+      },
+      {
+        "<leader>af",
+        function()
+          require("codecompanion").prompt("Fix")
+        end,
+        mode = "v",
+        desc = "AI Fix",
+      },
+      {
+        "<leader>at",
+        function()
+          require("codecompanion").prompt("Tests")
+        end,
+        mode = "v",
+        desc = "AI Generate Tests",
+      },
+      {
+        "<leader>ad",
+        function()
+          require("codecompanion").prompt("Document")
+        end,
+        mode = "v",
+        desc = "AI Generate Docs",
+      },
+      {
+        "<leader>ar",
+        function()
+          require("codecompanion").prompt("Refactor")
+        end,
+        mode = "v",
+        desc = "AI Refactor",
+      },
+      {
+        "<leader>ao",
+        function()
+          require("codecompanion").prompt("Optimize")
+        end,
+        mode = "v",
+        desc = "AI Optimize",
+      },
+      {
+        "<leader>av",
+        function()
+          require("codecompanion").prompt("Review")
+        end,
+        mode = "v",
+        desc = "AI Code Review",
+      },
 
       -- ═══════════════════════════════════════════════════════════════════
       -- Buffer & File Operations
       -- ═══════════════════════════════════════════════════════════════════
-      { "<leader>ab", function()
+      {
+        "<leader>ab",
+        function()
           local input = vim.fn.input("Ask about buffer: ")
           if input ~= "" then
             vim.cmd("CodeCompanionChat #buffer " .. input)
           end
-        end, desc = "AI Ask about Buffer" },
-      { "<leader>al", function()
+        end,
+        desc = "AI Ask about Buffer",
+      },
+      {
+        "<leader>al",
+        function()
           vim.cmd("CodeCompanionChat #lsp ")
-        end, desc = "AI with LSP Context" },
+        end,
+        desc = "AI with LSP Context",
+      },
 
       -- ═══════════════════════════════════════════════════════════════════
       -- Command Line AI (like :Copilot in VS Code)
@@ -102,50 +156,103 @@ return {
       { "<leader>a:", "<cmd>CodeCompanionCmd<cr>", desc = "AI Command" },
 
       -- ═══════════════════════════════════════════════════════════════════
-      -- Model & Settings
+      -- Adapter & Model Selection
       -- ═══════════════════════════════════════════════════════════════════
-      { "<leader>am", function()
+      {
+        "<leader>aA",
+        function()
+          local adapters = {
+            { name = "GitHub Copilot (Multi-model)", adapter = "copilot" },
+            { name = "Gemini CLI (Direct ACP)", adapter = "gemini_cli" },
+            { name = "Claude Code (Direct ACP)", adapter = "claude_code" },
+          }
+          local items = vim.tbl_map(function(a)
+            return a.name
+          end, adapters)
+          vim.ui.select(items, { prompt = " Select AI Adapter:" }, function(choice, idx)
+            if choice and idx then
+              vim.g.codecompanion_adapter = adapters[idx].adapter
+              require("codecompanion").setup({
+                strategies = {
+                  chat = { adapter = adapters[idx].adapter },
+                  inline = { adapter = adapters[idx].adapter },
+                  agent = { adapter = adapters[idx].adapter },
+                },
+              })
+              vim.notify(" AI Adapter: " .. choice, vim.log.levels.INFO)
+            end
+          end)
+        end,
+        desc = "AI Select Adapter",
+      },
+      {
+        "<leader>am",
+        function()
           local models = {
-            -- Claude (Anthropic) - Latest
+            -- ═══════════════════════════════════════════════════════════════════
+            -- Claude (Anthropic) - GitHub Copilot 2026
+            -- ═══════════════════════════════════════════════════════════════════
+            { name = "Claude Opus 4.5 (GA)", model = "claude-opus-4.5" },
             { name = "Claude 4.5 Sonnet", model = "claude-4.5-sonnet" },
-            { name = "Claude 4.5 Opus", model = "claude-4.5-opus" },
             { name = "Claude 4.5 Haiku", model = "claude-4.5-haiku" },
-            { name = "Claude 4 Sonnet", model = "claude-4-sonnet" },
-            { name = "Claude 4 Opus", model = "claude-4-opus" },
-            { name = "Claude 3.5 Sonnet", model = "claude-3.5-sonnet" },
+            { name = "Claude 3.7 Thinking", model = "claude-3.7-thinking" },
+            { name = "Claude 3.7", model = "claude-3.7" },
+            { name = "Claude Sonnet 3.5 (Deprecated)", model = "claude-3.5-sonnet" },
             { name = "Claude 3.5 Haiku", model = "claude-3.5-haiku" },
-            -- GPT (OpenAI)
-            { name = "GPT-4.5", model = "gpt-4.5" },
+
+            -- ═══════════════════════════════════════════════════════════════════
+            -- OpenAI - GitHub Copilot 2026
+            -- ═══════════════════════════════════════════════════════════════════
+            -- GPT Models
+            { name = "GPT-5-Codex", model = "gpt-5-codex" },
+            { name = "GPT-5.1-Codex", model = "gpt-5.1-codex" },
+            { name = "GPT-5.1-Codex-Mini", model = "gpt-5.1-codex-mini" },
+            { name = "GPT-5 mini", model = "gpt-5-mini" },
+            { name = "GPT-5", model = "gpt-5" },
+            { name = "GPT-4.1 (Default)", model = "gpt-4.1" },
             { name = "GPT-4o", model = "gpt-4o" },
             { name = "GPT-4o Mini", model = "gpt-4o-mini" },
             { name = "GPT-4 Turbo", model = "gpt-4-turbo" },
-            -- OpenAI Reasoning
-            { name = "o3", model = "o3" },
-            { name = "o3 Mini", model = "o3-mini" },
+            -- Reasoning Models
+            { name = "o3-mini", model = "o3-mini" },
             { name = "o1", model = "o1" },
-            { name = "o1 Mini", model = "o1-mini" },
-            { name = "o1 Pro", model = "o1-pro" },
-            -- Gemini (Google) - Latest
+            { name = "o1-mini", model = "o1-mini" },
+            { name = "o1-pro", model = "o1-pro" },
+
+            -- ═══════════════════════════════════════════════════════════════════
+            -- Google Gemini - GitHub Copilot 2026
+            -- ═══════════════════════════════════════════════════════════════════
+            { name = "Gemini 3 Flash (Preview)", model = "gemini-3-flash" },
             { name = "Gemini 3 Pro", model = "gemini-3-pro" },
-            { name = "Gemini 3 Flash", model = "gemini-3-flash" },
-            { name = "Gemini 3 Ultra", model = "gemini-3-ultra" },
             { name = "Gemini 2.5 Pro", model = "gemini-2.5-pro" },
             { name = "Gemini 2.0 Flash", model = "gemini-2.0-flash" },
             { name = "Gemini 2.0 Flash Thinking", model = "gemini-2.0-flash-thinking-exp" },
+
+            -- ═══════════════════════════════════════════════════════════════════
+            -- Other Models - GitHub Copilot 2026
+            -- ═══════════════════════════════════════════════════════════════════
+            { name = "Grok Code Fast 1", model = "grok-code-fast-1" },
+            { name = "Raptor mini", model = "raptor-mini" },
           }
-          local items = vim.tbl_map(function(m) return m.name end, models)
+          local items = vim.tbl_map(function(m)
+            return m.name
+          end, models)
           vim.ui.select(items, { prompt = " Select AI Model:" }, function(choice, idx)
             if choice and idx then
               vim.g.codecompanion_model = models[idx].model
               vim.notify(" AI Model: " .. choice, vim.log.levels.INFO)
             end
           end)
-        end, desc = "AI Select Model" },
+        end,
+        desc = "AI Select Model",
+      },
 
       -- ═══════════════════════════════════════════════════════════════════
       -- Copilot Inline Suggestions
       -- ═══════════════════════════════════════════════════════════════════
-      { "<leader>as", function()
+      {
+        "<leader>as",
+        function()
           local suggestion = require("copilot.suggestion")
           if suggestion.is_visible() then
             suggestion.dismiss()
@@ -154,7 +261,9 @@ return {
             suggestion.next()
             vim.notify("Copilot suggestions enabled", vim.log.levels.INFO)
           end
-        end, desc = "AI Toggle Suggestions" },
+        end,
+        desc = "AI Toggle Suggestions",
+      },
       { "<leader>ap", "<cmd>Copilot panel<cr>", desc = "AI Copilot Panel" },
     },
     opts = {
@@ -171,14 +280,22 @@ return {
             user = "  You",
           },
           slash_commands = {
+            -- telescope.nvim is not installed in this config; these providers
+            -- silently fell back or errored. fzf-lua is the picker in use.
             ["buffer"] = {
               opts = { provider = "default" },
             },
             ["file"] = {
-              opts = { provider = "telescope" },
+              opts = { provider = "fzf_lua" },
             },
             ["symbols"] = {
-              opts = { provider = "telescope" },
+              opts = { provider = "fzf_lua" },
+            },
+            ["agent"] = {
+              opts = { provider = "default" },
+            },
+            ["help"] = {
+              opts = { provider = "fzf_lua" },
             },
           },
           -- Use default keymaps from plugin
@@ -199,43 +316,83 @@ return {
       },
 
       -- ═══════════════════════════════════════════════════════════════════
-      -- Adapter Configuration (Copilot as primary)
+      -- Adapter Configuration (Multiple Adapters)
       -- ═══════════════════════════════════════════════════════════════════
       adapters = {
+        -- GitHub Copilot (Primary - Multi-model access)
         copilot = function()
           return require("codecompanion.adapters").extend("copilot", {
             schema = {
               model = {
                 default = vim.g.codecompanion_model or "claude-4.5-sonnet",
                 choices = {
-                  -- Claude (Anthropic) - Latest
+                  -- Claude (Anthropic) - GitHub Copilot 2026
+                  "claude-opus-4.5",
                   "claude-4.5-sonnet",
-                  "claude-4.5-opus",
                   "claude-4.5-haiku",
-                  "claude-4-sonnet",
-                  "claude-4-opus",
-                  "claude-3.5-sonnet",
+                  "claude-3.7-thinking",
+                  "claude-3.7",
+                  "claude-3.5-sonnet", -- Deprecated Feb 17, 2026
                   "claude-3.5-haiku",
-                  -- GPT (OpenAI)
-                  "gpt-4.5",
+                  -- OpenAI - GitHub Copilot 2026
+                  "gpt-5-codex",
+                  "gpt-5.1-codex",
+                  "gpt-5.1-codex-mini",
+                  "gpt-5-mini",
+                  "gpt-5",
+                  "gpt-4.1", -- Default model
                   "gpt-4o",
                   "gpt-4o-mini",
                   "gpt-4-turbo",
-                  -- OpenAI Reasoning
-                  "o3",
                   "o3-mini",
                   "o1",
                   "o1-mini",
                   "o1-pro",
-                  -- Gemini (Google) - Latest
-                  "gemini-3-pro",
+                  -- Gemini - GitHub Copilot 2026
                   "gemini-3-flash",
-                  "gemini-3-ultra",
+                  "gemini-3-pro",
                   "gemini-2.5-pro",
                   "gemini-2.0-flash",
                   "gemini-2.0-flash-thinking-exp",
+                  -- Other
+                  "grok-code-fast-1",
+                  "raptor-mini",
                 },
               },
+            },
+          })
+        end,
+
+        -- Gemini CLI (Direct access via ACP)
+        gemini_cli = function()
+          return require("codecompanion.adapters").extend("gemini_cli", {
+            commands = {
+              default = {
+                "gemini",
+                "--experimental-acp",
+              },
+            },
+            defaults = {
+              auth_method = "gemini-api-key",
+              timeout = 30000, -- 30 seconds
+            },
+            env = {
+              -- Set this in your shell: export GEMINI_API_KEY="your-key"
+              GEMINI_API_KEY = vim.fn.getenv("GEMINI_API_KEY") or "GEMINI_API_KEY",
+            },
+          })
+        end,
+
+        -- Claude Code (Direct access via ACP)
+        claude_code = function()
+          return require("codecompanion.adapters").extend("claude_code", {
+            defaults = {
+              timeout = 30000, -- 30 seconds
+            },
+            env = {
+              -- Set this in your shell: export ANTHROPIC_API_KEY="your-key"
+              -- Or use Claude Pro subscription for direct access
+              ANTHROPIC_API_KEY = vim.fn.getenv("ANTHROPIC_API_KEY") or "ANTHROPIC_API_KEY",
             },
           })
         end,
@@ -263,13 +420,15 @@ return {
 Welcome to CodeCompanion! Your AI-powered coding assistant.
 
 **Quick Commands:**
-- `@agent` - Enable agent mode for multi-step tasks
+- `/agent` - Enable agent mode for multi-step tasks
 - `@workspace` - Include workspace context
 - `#buffer` - Reference current buffer
 - `#file` - Include specific files
 - `/help` - Show all commands
 
-**Keymaps:** `<leader>am` to change models
+**Keymaps:**
+- `<leader>am` - Change models (40+ models available)
+- `<leader>aA` - Switch adapters (Copilot/Gemini CLI/Claude Code)
 ]],
           show_settings = false,
           show_token_count = true,
@@ -285,7 +444,7 @@ Welcome to CodeCompanion! Your AI-powered coding assistant.
           },
         },
         action_palette = {
-          provider = "telescope",
+          provider = "default",
           opts = {
             show_default_actions = true,
             show_default_prompt_library = true,
@@ -329,7 +488,10 @@ Guidelines:
           description = "Explain selected code in detail",
           opts = { auto_submit = true, short_name = "explain" },
           prompts = {
-            { role = "user", content = "Explain what this code does, including its purpose, logic flow, and any important details:\n\n```\n${visual}\n```" },
+            {
+              role = "user",
+              content = "Explain what this code does, including its purpose, logic flow, and any important details:\n\n```\n${visual}\n```",
+            },
           },
         },
 
@@ -339,7 +501,10 @@ Guidelines:
           description = "Find and fix bugs or issues",
           opts = { auto_submit = true, short_name = "fix" },
           prompts = {
-            { role = "user", content = "Analyze this code for bugs, issues, or potential problems and provide fixes:\n\n```\n${visual}\n```" },
+            {
+              role = "user",
+              content = "Analyze this code for bugs, issues, or potential problems and provide fixes:\n\n```\n${visual}\n```",
+            },
           },
         },
         ["Refactor"] = {
@@ -347,7 +512,10 @@ Guidelines:
           description = "Refactor for better structure",
           opts = { auto_submit = true, short_name = "refactor" },
           prompts = {
-            { role = "user", content = "Refactor this code to improve its structure, readability, and maintainability while preserving functionality:\n\n```\n${visual}\n```" },
+            {
+              role = "user",
+              content = "Refactor this code to improve its structure, readability, and maintainability while preserving functionality:\n\n```\n${visual}\n```",
+            },
           },
         },
         ["Optimize"] = {
@@ -355,7 +523,10 @@ Guidelines:
           description = "Optimize for performance",
           opts = { auto_submit = true, short_name = "optimize" },
           prompts = {
-            { role = "user", content = "Optimize this code for better performance. Identify bottlenecks and suggest improvements:\n\n```\n${visual}\n```" },
+            {
+              role = "user",
+              content = "Optimize this code for better performance. Identify bottlenecks and suggest improvements:\n\n```\n${visual}\n```",
+            },
           },
         },
 
@@ -365,7 +536,10 @@ Guidelines:
           description = "Generate comprehensive tests",
           opts = { auto_submit = true, short_name = "tests" },
           prompts = {
-            { role = "user", content = "Generate comprehensive unit tests for this code, covering edge cases and error scenarios:\n\n```\n${visual}\n```" },
+            {
+              role = "user",
+              content = "Generate comprehensive unit tests for this code, covering edge cases and error scenarios:\n\n```\n${visual}\n```",
+            },
           },
         },
         ["Document"] = {
@@ -373,7 +547,10 @@ Guidelines:
           description = "Add documentation comments",
           opts = { auto_submit = true, short_name = "doc" },
           prompts = {
-            { role = "user", content = "Add comprehensive documentation comments (docstrings, JSDoc, etc.) to this code:\n\n${visual}" },
+            {
+              role = "user",
+              content = "Add comprehensive documentation comments (docstrings, JSDoc, etc.) to this code:\n\n${visual}",
+            },
           },
         },
         ["Types"] = {
@@ -391,7 +568,9 @@ Guidelines:
           description = "Comprehensive code review",
           opts = { auto_submit = true, short_name = "review" },
           prompts = {
-            { role = "user", content = [[Perform a comprehensive code review covering:
+            {
+              role = "user",
+              content = [[Perform a comprehensive code review covering:
 1. **Bugs & Issues**: Potential bugs or logic errors
 2. **Security**: Security vulnerabilities or concerns
 3. **Performance**: Performance issues or optimizations
@@ -402,7 +581,8 @@ Guidelines:
 Code to review:
 ```
 ${visual}
-```]] },
+```]],
+            },
           },
         },
 
@@ -412,8 +592,14 @@ ${visual}
           description = "Implement a new feature (agent mode)",
           opts = { auto_submit = false },
           prompts = {
-            { role = "system", content = "You are in agent mode. You can read files, search the codebase, and make multi-file edits. Work step by step to implement the requested feature." },
-            { role = "user", content = "@agent Implement the following feature. First, analyze the codebase to understand the structure, then make the necessary changes:\n\nFeature: " },
+            {
+              role = "system",
+              content = "You are in agent mode. You can read files, search the codebase, and make multi-file edits. Work step by step to implement the requested feature.",
+            },
+            {
+              role = "user",
+              content = "@agent Implement the following feature. First, analyze the codebase to understand the structure, then make the necessary changes:\n\nFeature: ",
+            },
           },
         },
         ["Debug Issue"] = {
@@ -421,8 +607,14 @@ ${visual}
           description = "Debug an issue (agent mode)",
           opts = { auto_submit = false },
           prompts = {
-            { role = "system", content = "You are in agent mode. Use available tools to investigate and fix the issue." },
-            { role = "user", content = "@agent Debug and fix the following issue. Investigate the relevant code and propose a solution:\n\nIssue: " },
+            {
+              role = "system",
+              content = "You are in agent mode. Use available tools to investigate and fix the issue.",
+            },
+            {
+              role = "user",
+              content = "@agent Debug and fix the following issue. Investigate the relevant code and propose a solution:\n\nIssue: ",
+            },
           },
         },
 
@@ -432,7 +624,10 @@ ${visual}
           description = "Generate a commit message",
           opts = { auto_submit = true, short_name = "commit" },
           prompts = {
-            { role = "user", content = "Generate a concise, descriptive git commit message following conventional commits format for these changes:\n\n```\n${visual}\n```" },
+            {
+              role = "user",
+              content = "Generate a concise, descriptive git commit message following conventional commits format for these changes:\n\n```\n${visual}\n```",
+            },
           },
         },
         ["Simplify"] = {
@@ -440,7 +635,10 @@ ${visual}
           description = "Simplify complex code",
           opts = { auto_submit = true, short_name = "simplify" },
           prompts = {
-            { role = "user", content = "Simplify this code while maintaining its functionality. Make it more readable and concise:\n\n${visual}" },
+            {
+              role = "user",
+              content = "Simplify this code while maintaining its functionality. Make it more readable and concise:\n\n${visual}",
+            },
           },
         },
       },
@@ -486,6 +684,7 @@ ${visual}
           { "<leader>ab", desc = "Ask about Buffer" },
           { "<leader>al", desc = "With LSP Context" },
           -- Settings
+          { "<leader>aA", desc = "Select Adapter" },
           { "<leader>am", desc = "Select Model" },
           { "<leader>as", desc = "Toggle Suggestions" },
           { "<leader>ap", desc = "Copilot Panel" },

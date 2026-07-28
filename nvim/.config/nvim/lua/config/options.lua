@@ -1,15 +1,13 @@
 -- Options
 local opt = vim.opt
 
--- Compatibility shims for deprecated vim.lsp functions (nvim 0.11+)
+-- Compatibility shims for deprecated vim.lsp functions
 -- Some plugins still use the old API (e.g., project.nvim, aerial.nvim)
-if vim.fn.has("nvim-0.11") == 1 then
-  vim.lsp.buf_get_clients = function(bufnr)
-    return vim.lsp.get_clients({ buffer = bufnr })
-  end
-  vim.lsp.get_active_clients = function(filter)
-    return vim.lsp.get_clients(filter)
-  end
+vim.lsp.buf_get_clients = function(bufnr)
+  return vim.lsp.get_clients({ buffer = bufnr })
+end
+vim.lsp.get_active_clients = function(filter)
+  return vim.lsp.get_clients(filter)
 end
 
 -- Note: Leader keys are set in init.lua (before plugins load)
@@ -58,6 +56,4 @@ opt.wildmode = "longest:full,full" -- Command-line completion mode
 opt.winminwidth = 5 -- Minimum window width
 opt.wrap = false -- Disable line wrap
 
-if vim.fn.has("nvim-0.10") == 1 then
-  opt.smoothscroll = true
-end
+opt.smoothscroll = true

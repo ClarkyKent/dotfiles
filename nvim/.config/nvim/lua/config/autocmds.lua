@@ -13,7 +13,7 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 vim.api.nvim_create_autocmd("TextYankPost", {
   group = augroup("highlight_yank"),
   callback = function()
-    vim.highlight.on_yank()
+    vim.hl.on_yank()
   end,
 })
 
@@ -98,7 +98,59 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- ── Filetype detection for embedded / firmware formats ──────────────────
+-- Neovim has no builtin rules for several formats this project uses daily.
+vim.filetype.add({
+  extension = {
+    -- Linker scripts. `ld` gets a treesitter parser (linkerscript).
+    ld = "ld",
+    lds = "ld",
+    icf = "ld", -- IAR linker config
+    sct = "ld", -- ARM scatter file
+    -- ARM assembly. Neovim guesses `asm`; force the GNU dialect used here.
+    s = "asm",
+    S = "asm",
+    -- Device tree
+    dts = "dts",
+    dtsi = "dts",
+    overlay = "dts",
+    -- Map files from the linker
+    map = "mapfile",
+    -- Robot Framework resource files
+    resource = "robot",
+    -- Renode platform / script files
+    repl = "renode",
+    resc = "renode",
+  },
+  filename = {
+    [".justfile"] = "just",
+    ["justfile"] = "just",
+    ["Justfile"] = "just",
+    ["Kconfig"] = "kconfig",
+    ["gcovr.cfg"] = "cfg",
+    ["meson.options"] = "meson",
+    ["meson_options.txt"] = "meson",
+    [".clangd"] = "yaml",
+    [".clang-tidy"] = "yaml",
+    [".clang-format"] = "yaml",
+    ["sonar-project.properties"] = "jproperties",
+  },
+  pattern = {
+    -- Meson configure_file templates are not valid C -- keep clang-format and
+    -- the C treesitter parser away from them.
+    [".*%.h%.in"] = "config",
+    [".*%.c%.in"] = "config",
+    [".*/%.vscode/.*%.json"] = "jsonc",
+  },
+})
+
 -- LSP Keymaps (attached when LSP is active)
+--
+-- Neovim 0.11+ ships defaults under the `gr` prefix: grn (rename), gra (code
+-- action), grr (references), gri (implementation), grt (type definition) and
+-- gO (document symbols). Mapping `gr` itself -- as this config used to -- makes
+-- every one of those unreachable, because a complete buffer-local mapping wins
+-- over longer global ones. Only genuinely missing bindings are added here.
 vim.api.nvim_create_autocmd("LspAttach", {
   group = augroup("lsp_keymaps"),
   callback = function(args)
@@ -108,35 +160,38 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end
 
     -- Navigation
-    map("n", "gd", vim.lsp.buf.definition, "Go to Definition")
-    map("n", "gD", vim.lsp.buf.declaration, "Go to Declaration")
-    map("n", "gI", vim.lsp.buf.implementation, "Go to Implementation")
-    map("n", "gy", vim.lsp.buf.type_definition, "Go to Type Definition")
-    map("n", "gr", vim.lsp.buf.references, "References")
+    map("n", "gd", vim.lsp.buf.definition, "Go to definition")
+    map("n", "gD", vim.lsp.buf.declaration, "Go to declaration")
+    map("n", "gy", vim.lsp.buf.type_definition, "Go to type definition")
     map("n", "K", vim.lsp.buf.hover, "Hover")
-    map("n", "gK", vim.lsp.buf.signature_help, "Signature Help")
-    map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature Help")
+    map("n", "gK", vim.lsp.buf.signature_help, "Signature help")
+    map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature help")
 
-    -- Code actions
-    map("n", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-    map("v", "<leader>ca", vim.lsp.buf.code_action, "Code Action")
-    map("n", "<leader>cr", vim.lsp.buf.rename, "Rename")
+    -- Leader aliases for the native gr* defaults, for discoverability.
+    map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
+    map("n", "<leader>cr", vim.lsp.buf.rename, "Rename symbol")
+    map("n", "<leader>cR", vim.lsp.buf.references, "References")
 
     -- Diagnostics
-    map("n", "[d", vim.diagnostic.goto_prev, "Prev Diagnostic")
-    map("n", "]d", vim.diagnostic.goto_next, "Next Diagnostic")
-    map("n", "<leader>cd", vim.diagnostic.open_float, "Line Diagnostics")
-
-    -- Format (if no conform.nvim)
-    map({ "n", "v" }, "<leader>cf", function()
-      vim.lsp.buf.format({ async = true })
-    end, "Format")
+    map("n", "[d", function()
+      vim.diagnostic.jump({ count = -1, float = true })
+    end, "Prev diagnostic")
+    map("n", "]d", function()
+      vim.diagnostic.jump({ count = 1, float = true })
+    end, "Next diagnostic")
+    map("n", "[e", function()
+      vim.diagnostic.jump({ count = -1, float = true, severity = vim.diagnostic.severity.ERROR })
+    end, "Prev error")
+    map("n", "]e", function()
+      vim.diagnostic.jump({ count = 1, float = true, severity = vim.diagnostic.severity.ERROR })
+    end, "Next error")
+    map("n", "<leader>cd", vim.diagnostic.open_float, "Line diagnostics")
 
     -- Toggle inlay hints
-    if vim.lsp.inlay_hint then
-      map("n", "<leader>uh", function()
-        vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = buffer }), { bufnr = buffer })
-      end, "Toggle Inlay Hints")
-    end
+    map("n", "<leader>uh", function()
+      vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = buffer }), { bufnr = buffer })
+    end, "Toggle inlay hints")
+
+    -- Document highlight under cursor is handled by vim-illuminate.
   end,
 })

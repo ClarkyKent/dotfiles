@@ -1,118 +1,82 @@
--- Utility functions for configuration
+-- Small helpers shared across the configuration.
 local M = {}
 
--- LSP utilities
-M.lsp = {}
-
--- Simple on_attach registry
-local on_attach_callbacks = {}
-
-function M.lsp.on_attach(callback)
-  table.insert(on_attach_callbacks, callback)
-end
-
-function M.lsp.get_on_attach_callbacks()
-
-  return on_attach_callbacks
-
-end
-
-
-
----@param name string
-
+---Toggle a vim option, optionally cycling between two explicit values.
+---@param name string option name
+---@param silent? boolean suppress the notification
+---@param values? string[] two values to cycle between, instead of boolean
 function M.toggle(name, silent, values)
-
   if values then
-
     if vim.opt_local[name]:get() == values[1] then
-
       vim.opt_local[name] = values[2]
-
     else
-
       vim.opt_local[name] = values[1]
-
     end
-
   else
-
     vim.opt_local[name] = not vim.opt_local[name]:get()
-
   end
 
-  if not silent then
-
-    local status = vim.opt_local[name]:get()
-
-    if type(status) == "boolean" then
-
-      status = status and "Enabled" or "Disabled"
-
-    end
-
-    local icon = status == "Enabled" and "󰄲 " or "󰄱 "
-
-    vim.notify(icon .. " " .. name .. " " .. status, vim.log.levels.INFO, { title = "Option" })
-
+  if silent then
+    return
   end
 
+  local status = vim.opt_local[name]:get()
+  if type(status) == "boolean" then
+    status = status and "Enabled" or "Disabled"
+  end
+  local icon = status == "Enabled" and "󰄲 " or "󰄱 "
+  vim.notify(icon .. " " .. name .. " " .. tostring(status), vim.log.levels.INFO, { title = "Option" })
 end
 
-
-
+---Report the result of an external toggle function.
 ---@param name string
-
----@param fn fun(state: boolean): boolean?
-
+---@param fn fun(): boolean?
+---@param silent? boolean
 function M.toggle_fn(name, fn, silent)
-
   local state = fn()
+  if silent then
+    return
+  end
+  local status = state and "Enabled" or "Disabled"
+  local icon = state and "󰄲 " or "󰄱 "
+  vim.notify(icon .. " " .. name .. " " .. status, vim.log.levels.INFO, { title = "Toggle" })
+end
 
-  if not silent then
+---Toggle inline (virtual text) diagnostics.
+function M.toggle_diagnostics()
+  local config = vim.diagnostic.config() or {}
+  local new_value = config.virtual_text == false
+  vim.diagnostic.config({ virtual_text = new_value })
+  local icon = new_value and "󰄲 " or "󰄱 "
+  vim.notify(
+    icon .. " Inline Diagnostics " .. (new_value and "Enabled" or "Disabled"),
+    vim.log.levels.INFO,
+    { title = "LSP" }
+  )
+end
 
-    local status = state and "Enabled" or "Disabled"
+---Suppress or restore SonarLint diagnostics without stopping the server.
+function M.toggle_sonarlint()
+  if _G._sonarlint_enabled == nil then
+    _G._sonarlint_enabled = true
+  end
+  _G._sonarlint_enabled = not _G._sonarlint_enabled
 
-    local icon = status == "Enabled" and "󰄲 " or "󰄱 "
-
-        vim.notify(icon .. " " .. name .. " " .. status, vim.log.levels.INFO, { title = "Toggle" })
-
+  if not _G._sonarlint_enabled then
+    for _, client in ipairs(vim.lsp.get_clients({ name = "sonarlint" })) do
+      local ns = vim.lsp.diagnostic.get_namespace(client.id)
+      for _, buffer in ipairs(vim.api.nvim_list_bufs()) do
+        vim.diagnostic.reset(ns, buffer)
       end
-
     end
+  end
 
-    
+  local icon = _G._sonarlint_enabled and "󰄲 " or "󰄱 "
+  vim.notify(
+    icon .. " SonarLint Diagnostics " .. (_G._sonarlint_enabled and "Enabled" or "Disabled"),
+    vim.log.levels.INFO,
+    { title = "SonarQube" }
+  )
+end
 
-    function M.toggle_diagnostics()
-
-      local config = vim.diagnostic.config() or {}
-
-      local virtual_text = config.virtual_text
-
-      local new_value
-
-      if virtual_text == false then
-
-        new_value = true
-
-      else
-
-        new_value = false
-
-      end
-
-      vim.diagnostic.config({ virtual_text = new_value })
-
-      local status = new_value and "Enabled" or "Disabled"
-
-      local icon = new_value and "󰄲 " or "󰄱 "
-
-      vim.notify(icon .. " Inline Diagnostics " .. status, vim.log.levels.INFO, { title = "LSP" })
-
-    end
-
-    
-
-    return M
-
-    
+return M

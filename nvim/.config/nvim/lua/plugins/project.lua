@@ -9,9 +9,27 @@ return {
       pre_save = nil,
     },
     keys = {
-      { "<leader>qs", function() require("persistence").load() end, desc = "Restore Session" },
-      { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-      { "<leader>qd", function() require("persistence").stop() end, desc = "Don't Save Current Session" },
+      {
+        "<leader>qs",
+        function()
+          require("persistence").load()
+        end,
+        desc = "Restore Session",
+      },
+      {
+        "<leader>ql",
+        function()
+          require("persistence").load({ last = true })
+        end,
+        desc = "Restore Last Session",
+      },
+      {
+        "<leader>qd",
+        function()
+          require("persistence").stop()
+        end,
+        desc = "Don't Save Current Session",
+      },
     },
   },
 
@@ -22,7 +40,17 @@ return {
     opts = {
       manual_mode = false,
       detection_methods = { "lsp", "pattern" },
-      patterns = { ".git", "_darcs", ".hg", ".bzr", ".svn", "Makefile", "package.json", "meson.build", "CMakeLists.txt" },
+      patterns = {
+        ".git",
+        "_darcs",
+        ".hg",
+        ".bzr",
+        ".svn",
+        "Makefile",
+        "package.json",
+        "meson.build",
+        "CMakeLists.txt",
+      },
       ignore_lsp = {},
       exclude_dirs = {},
       show_hidden = false,
@@ -36,7 +64,13 @@ return {
       require("fzf-lua").register_ui_select()
     end,
     keys = {
-      { "<leader>fp", function() require("fzf-lua").projects() end, desc = "Projects" },
+      {
+        "<leader>fp",
+        function()
+          require("fzf-lua").projects()
+        end,
+        desc = "Projects",
+      },
     },
   },
 

@@ -11,7 +11,9 @@ return {
         local search_path = path or vim.uv.cwd()
 
         local root = vim.fs.find(".git", { path = search_path, upward = true })[1]
-        if root then return vim.fs.dirname(root) end
+        if root then
+          return vim.fs.dirname(root)
+        end
 
         root = vim.fs.find({ "Makefile", "meson.build", "Cargo.toml", "pyproject.toml", "package.json" }, {
           path = search_path,
@@ -22,28 +24,64 @@ return {
     end,
     keys = {
       { "<leader>,", "<cmd>FzfLua buffers<cr>", desc = "Switch Buffer" },
-      { "<leader>/", function() require("fzf-lua").live_grep({ cwd = _G.fzf_get_root() }) end, desc = "Grep (Root Dir)" },
+      {
+        "<leader>/",
+        function()
+          require("fzf-lua").live_grep({ cwd = _G.fzf_get_root() })
+        end,
+        desc = "Grep (Root Dir)",
+      },
       { "<leader>:", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
-      { "<leader><space>", function() require("fzf-lua").files({ cwd = _G.fzf_get_root() }) end, desc = "Find Files (Root Dir)" },
+      {
+        "<leader><space>",
+        function()
+          require("fzf-lua").files({ cwd = _G.fzf_get_root() })
+        end,
+        desc = "Find Files (Root Dir)",
+      },
       -- find
       { "<leader>fb", "<cmd>FzfLua buffers<cr>", desc = "Buffers" },
-      { "<leader>ff", function() require("fzf-lua").files({ cwd = _G.fzf_get_root() }) end, desc = "Find Files (Root Dir)" },
-      { "<leader>fF", function() require("fzf-lua").files({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Find Files (Cwd)" },
+      {
+        "<leader>ff",
+        function()
+          require("fzf-lua").files({ cwd = _G.fzf_get_root() })
+        end,
+        desc = "Find Files (Root Dir)",
+      },
+      {
+        "<leader>fF",
+        function()
+          require("fzf-lua").files({ cwd = vim.fn.expand("%:p:h") })
+        end,
+        desc = "Find Files (Cwd)",
+      },
       { "<leader>fg", "<cmd>FzfLua git_files<cr>", desc = "Find Files (git-files)" },
       { "<leader>fr", "<cmd>FzfLua oldfiles<cr>", desc = "Recent" },
       -- git
       { "<leader>gc", "<cmd>FzfLua git_commits<cr>", desc = "Commits" },
       { "<leader>gs", "<cmd>FzfLua git_status<cr>", desc = "Status" },
       -- search
-      { "<leader>s\"", "<cmd>FzfLua registers<cr>", desc = "Registers" },
+      { '<leader>s"', "<cmd>FzfLua registers<cr>", desc = "Registers" },
       { "<leader>sa", "<cmd>FzfLua autocmds<cr>", desc = "Auto Commands" },
       { "<leader>sb", "<cmd>FzfLua lines<cr>", desc = "Buffer Lines" },
       { "<leader>sc", "<cmd>FzfLua command_history<cr>", desc = "Command History" },
       { "<leader>sC", "<cmd>FzfLua commands<cr>", desc = "Commands" },
       { "<leader>sd", "<cmd>FzfLua diagnostics_document<cr>", desc = "Document Diagnostics" },
       { "<leader>sD", "<cmd>FzfLua diagnostics_workspace<cr>", desc = "Workspace Diagnostics" },
-      { "<leader>sg", function() require("fzf-lua").live_grep({ cwd = _G.fzf_get_root() }) end, desc = "Grep (Root Dir)" },
-      { "<leader>sG", function() require("fzf-lua").live_grep({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Grep (Cwd)" },
+      {
+        "<leader>sg",
+        function()
+          require("fzf-lua").live_grep({ cwd = _G.fzf_get_root() })
+        end,
+        desc = "Grep (Root Dir)",
+      },
+      {
+        "<leader>sG",
+        function()
+          require("fzf-lua").live_grep({ cwd = vim.fn.expand("%:p:h") })
+        end,
+        desc = "Grep (Cwd)",
+      },
       { "<leader>sh", "<cmd>FzfLua help_tags<cr>", desc = "Help Pages" },
       { "<leader>sH", "<cmd>FzfLua highlights<cr>", desc = "Search Highlight Groups" },
       { "<leader>sk", "<cmd>FzfLua keymaps<cr>", desc = "Key Maps" },
@@ -54,10 +92,36 @@ return {
       { "<leader>sR", "<cmd>FzfLua resume<cr>", desc = "Resume" },
       { "<leader>sq", "<cmd>FzfLua quickfix<cr>", desc = "Quickfix List" },
       { "<leader>ss", "<cmd>FzfLua lsp_document_symbols<cr>", desc = "Document Symbols" },
-      { "<leader>sw", function() require("fzf-lua").grep_cword({ cwd = _G.fzf_get_root() }) end, desc = "Word (Root Dir)" },
-      { "<leader>sW", function() require("fzf-lua").grep_cword({ cwd = vim.fn.expand("%:p:h") }) end, desc = "Word (Cwd)" },
-      { "<leader>sw", function() require("fzf-lua").grep_visual({ cwd = _G.fzf_get_root() }) end, mode = "v", desc = "Selection (Root Dir)" },
-      { "<leader>sW", function() require("fzf-lua").grep_visual({ cwd = vim.fn.expand("%:p:h") }) end, mode = "v", desc = "Selection (Cwd)" },
+      {
+        "<leader>sw",
+        function()
+          require("fzf-lua").grep_cword({ cwd = _G.fzf_get_root() })
+        end,
+        desc = "Word (Root Dir)",
+      },
+      {
+        "<leader>sW",
+        function()
+          require("fzf-lua").grep_cword({ cwd = vim.fn.expand("%:p:h") })
+        end,
+        desc = "Word (Cwd)",
+      },
+      {
+        "<leader>sw",
+        function()
+          require("fzf-lua").grep_visual({ cwd = _G.fzf_get_root() })
+        end,
+        mode = "v",
+        desc = "Selection (Root Dir)",
+      },
+      {
+        "<leader>sW",
+        function()
+          require("fzf-lua").grep_visual({ cwd = vim.fn.expand("%:p:h") })
+        end,
+        mode = "v",
+        desc = "Selection (Cwd)",
+      },
       { "<leader>s*", "<cmd>FzfLua lgrep_curbuf<cr>", desc = "Word in Buffer" },
     },
     opts = {
@@ -340,17 +404,59 @@ return {
     "folke/flash.nvim",
     event = "VeryLazy",
     vscode = true,
-    opts = {},
+    opts = {
+      modes = {
+        char = { jump_labels = true },
+      },
+    },
     keys = {
-      { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-      { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-      { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
-      { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
-      { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
+      {
+        "s",
+        mode = { "n", "x", "o" },
+        function()
+          require("flash").jump()
+        end,
+        desc = "Flash",
+      },
+      {
+        "S",
+        mode = { "n", "o", "x" },
+        function()
+          require("flash").treesitter()
+        end,
+        desc = "Flash Treesitter",
+      },
+      {
+        "r",
+        mode = "o",
+        function()
+          require("flash").remote()
+        end,
+        desc = "Remote Flash",
+      },
+      {
+        "R",
+        mode = { "o", "x" },
+        function()
+          require("flash").treesitter_search()
+        end,
+        desc = "Treesitter Search",
+      },
+      {
+        "<c-s>",
+        mode = { "c" },
+        function()
+          require("flash").toggle()
+        end,
+        desc = "Toggle Flash Search",
+      },
     },
   },
 
   -- Mini.surround
+  -- Mapped under `gs` rather than `s`: flash.nvim owns `s` for jumping, and
+  -- having both meant every `sa`/`sd`/`sr` waited a full 'timeoutlen' for
+  -- disambiguation.
   {
     "echasnovski/mini.surround",
     keys = function(_, keys)
@@ -373,13 +479,13 @@ return {
     end,
     opts = {
       mappings = {
-        add = "sa", -- Add surrounding in Normal and Visual modes
-        delete = "sd", -- Delete surrounding
-        find = "sf", -- Find surrounding (to the right)
-        find_left = "sF", -- Find surrounding (to the left)
-        highlight = "sh", -- Highlight surrounding
-        replace = "sr", -- Replace surrounding
-        update_n_lines = "sn", -- Update `n_lines`
+        add = "gsa", -- Add surrounding in Normal and Visual modes
+        delete = "gsd", -- Delete surrounding
+        find = "gsf", -- Find surrounding (to the right)
+        find_left = "gsF", -- Find surrounding (to the left)
+        highlight = "gsh", -- Highlight surrounding
+        replace = "gsr", -- Replace surrounding
+        update_n_lines = "gsn", -- Update `n_lines`
       },
     },
   },
@@ -390,13 +496,56 @@ return {
     branch = "harpoon2",
     dependencies = { "nvim-lua/plenary.nvim" },
     keys = {
-      { "<leader>H", function() require("harpoon"):list():add() end, desc = "Harpoon File" },
-      { "<leader>h", function() local harpoon = require("harpoon"); harpoon.ui:toggle_quick_menu(harpoon:list()) end, desc = "Harpoon Quick Menu" },
-      { "<leader>1", function() require("harpoon"):list():select(1) end, desc = "Harpoon to File 1" },
-      { "<leader>2", function() require("harpoon"):list():select(2) end, desc = "Harpoon to File 2" },
-      { "<leader>3", function() require("harpoon"):list():select(3) end, desc = "Harpoon to File 3" },
-      { "<leader>4", function() require("harpoon"):list():select(4) end, desc = "Harpoon to File 4" },
-      { "<leader>5", function() require("harpoon"):list():select(5) end, desc = "Harpoon to File 5" },
+      {
+        "<leader>H",
+        function()
+          require("harpoon"):list():add()
+        end,
+        desc = "Harpoon File",
+      },
+      {
+        "<leader>h",
+        function()
+          local harpoon = require("harpoon")
+          harpoon.ui:toggle_quick_menu(harpoon:list())
+        end,
+        desc = "Harpoon Quick Menu",
+      },
+      {
+        "<leader>1",
+        function()
+          require("harpoon"):list():select(1)
+        end,
+        desc = "Harpoon to File 1",
+      },
+      {
+        "<leader>2",
+        function()
+          require("harpoon"):list():select(2)
+        end,
+        desc = "Harpoon to File 2",
+      },
+      {
+        "<leader>3",
+        function()
+          require("harpoon"):list():select(3)
+        end,
+        desc = "Harpoon to File 3",
+      },
+      {
+        "<leader>4",
+        function()
+          require("harpoon"):list():select(4)
+        end,
+        desc = "Harpoon to File 4",
+      },
+      {
+        "<leader>5",
+        function()
+          require("harpoon"):list():select(5)
+        end,
+        desc = "Harpoon to File 5",
+      },
     },
     opts = {},
   },
@@ -417,7 +566,7 @@ return {
       current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
       current_line_blame_opts = {
         virt_text = true,
-        virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+        virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
         delay = 500,
         ignore_whitespace = false,
       },
@@ -464,12 +613,16 @@ return {
   {
     "folke/trouble.nvim",
     cmd = { "Trouble", "TroubleToggle" },
-    opts = { use_diagnostic_signs = true },
+    opts = {},
     keys = {
       { "<leader>xx", "<cmd>Trouble diagnostics toggle<cr>", desc = "Diagnostics (Trouble)" },
       { "<leader>xX", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", desc = "Buffer Diagnostics (Trouble)" },
       { "<leader>cs", "<cmd>Trouble symbols toggle focus=false<cr>", desc = "Symbols (Trouble)" },
-      { "<leader>cl", "<cmd>Trouble lsp toggle focus=false win.position=right<cr>", desc = "LSP Definitions / References (Trouble)" },
+      {
+        "<leader>cl",
+        "<cmd>Trouble lsp toggle focus=false win.position=right<cr>",
+        desc = "LSP Definitions / References (Trouble)",
+      },
       { "<leader>xL", "<cmd>Trouble loclist toggle<cr>", desc = "Location List (Trouble)" },
       { "<leader>xQ", "<cmd>Trouble qflist toggle<cr>", desc = "Quickfix List (Trouble)" },
     },
@@ -497,7 +650,60 @@ return {
         end,
         desc = "Delete Buffer",
       },
-      { "<leader>bD", function() require("mini.bufremove").delete(0, true) end, desc = "Delete Buffer (Force)" },
+      {
+        "<leader>bD",
+        function()
+          require("mini.bufremove").delete(0, true)
+        end,
+        desc = "Delete Buffer (Force)",
+      },
+    },
+  },
+
+  -- Yazi File Manager Integration
+  {
+    "mikavilpas/yazi.nvim",
+    event = "VeryLazy",
+    keys = {
+      {
+        "<F7>",
+        function()
+          require("yazi").yazi()
+        end,
+        desc = "Open Yazi File Manager",
+      },
+      {
+        "<leader>fy",
+        function()
+          require("yazi").yazi()
+        end,
+        desc = "Yazi (File Manager)",
+      },
+      {
+        "<leader>fY",
+        function()
+          require("yazi").yazi(nil, vim.fn.getcwd())
+        end,
+        desc = "Yazi (cwd)",
+      },
+    },
+    opts = {
+      -- Enable these if you want to open yazi instead of netrw
+      open_for_directories = false,
+      keymaps = {
+        show_help = "<f1>",
+        open_file_in_vertical_split = "<c-v>",
+        open_file_in_horizontal_split = "<c-x>",
+        open_file_in_tab = "<c-t>",
+        grep_in_directory = "<c-s>",
+        replace_in_directory = "<c-g>",
+        cycle_open_buffers = "<tab>",
+        copy_relative_path_to_selected_files = "<c-y>",
+        send_to_quickfix_list = "<c-q>",
+      },
+      floating_window_scaling_factor = 0.9,
+      yazi_floating_window_winblend = 0,
+      yazi_floating_window_border = "rounded",
     },
   },
 }

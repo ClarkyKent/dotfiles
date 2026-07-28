@@ -85,7 +85,12 @@ return {
           { "n", "<cr>", "<cmd>lua require('diffview.actions').select_entry()<cr>", { desc = "Open the diff" } },
           { "n", "o", "<cmd>lua require('diffview.actions').select_entry()<cr>", { desc = "Open the diff" } },
           { "n", "l", "<cmd>lua require('diffview.actions').select_entry()<cr>", { desc = "Open the diff" } },
-          { "n", "<2-LeftMouse>", "<cmd>lua require('diffview.actions').select_entry()<cr>", { desc = "Open the diff" } },
+          {
+            "n",
+            "<2-LeftMouse>",
+            "<cmd>lua require('diffview.actions').select_entry()<cr>",
+            { desc = "Open the diff" },
+          },
           { "n", "-", "<cmd>lua require('diffview.actions').toggle_stage_entry()<cr>", { desc = "Stage / unstage" } },
           { "n", "S", "<cmd>lua require('diffview.actions').stage_all()<cr>", { desc = "Stage all entries" } },
           { "n", "U", "<cmd>lua require('diffview.actions').unstage_all()<cr>", { desc = "Unstage all entries" } },
@@ -100,15 +105,30 @@ return {
           { "n", "<c-b>", "<cmd>lua require('diffview.actions').scroll_view(-0.25)<cr>", { desc = "Scroll view up" } },
           { "n", "<c-f>", "<cmd>lua require('diffview.actions').scroll_view(0.25)<cr>", { desc = "Scroll view down" } },
           { "n", "<tab>", "<cmd>lua require('diffview.actions').select_next_entry()<cr>", { desc = "Next entry" } },
-          { "n", "<s-tab>", "<cmd>lua require('diffview.actions').select_prev_entry()<cr>", { desc = "Previous entry" } },
+          {
+            "n",
+            "<s-tab>",
+            "<cmd>lua require('diffview.actions').select_prev_entry()<cr>",
+            { desc = "Previous entry" },
+          },
           { "n", "gf", "<cmd>lua require('diffview.actions').goto_file_edit()<cr>", { desc = "Open file" } },
-          { "n", "<C-w><C-f>", "<cmd>lua require('diffview.actions').goto_file_split()<cr>", { desc = "Open file in split" } },
+          {
+            "n",
+            "<C-w><C-f>",
+            "<cmd>lua require('diffview.actions').goto_file_split()<cr>",
+            { desc = "Open file in split" },
+          },
           { "n", "<C-w>gf", "<cmd>lua require('diffview.actions').goto_file_tab()<cr>", { desc = "Open file in tab" } },
           { "n", "i", "<cmd>lua require('diffview.actions').listing_style()<cr>", { desc = "Toggle listing style" } },
           { "n", "f", "<cmd>lua require('diffview.actions').toggle_flatten_dirs()<cr>", { desc = "Flatten dirs" } },
           { "n", "R", "<cmd>lua require('diffview.actions').refresh_files()<cr>", { desc = "Refresh files" } },
           { "n", "<leader>e", "<cmd>lua require('diffview.actions').focus_files()<cr>", { desc = "Focus file panel" } },
-          { "n", "<leader>b", "<cmd>lua require('diffview.actions').toggle_files()<cr>", { desc = "Toggle file panel" } },
+          {
+            "n",
+            "<leader>b",
+            "<cmd>lua require('diffview.actions').toggle_files()<cr>",
+            { desc = "Toggle file panel" },
+          },
           { "n", "g<C-x>", "<cmd>lua require('diffview.actions').cycle_layout()<cr>", { desc = "Cycle layout" } },
           { "n", "[x", "<cmd>lua require('diffview.actions').prev_conflict()<cr>", { desc = "Previous conflict" } },
           { "n", "]x", "<cmd>lua require('diffview.actions').next_conflict()<cr>", { desc = "Next conflict" } },
@@ -117,7 +137,12 @@ return {
         },
         file_history_panel = {
           { "n", "g!", "<cmd>lua require('diffview.actions').options()<cr>", { desc = "Options" } },
-          { "n", "<C-A-d>", "<cmd>lua require('diffview.actions').open_in_diffview()<cr>", { desc = "Open in diffview" } },
+          {
+            "n",
+            "<C-A-d>",
+            "<cmd>lua require('diffview.actions').open_in_diffview()<cr>",
+            { desc = "Open in diffview" },
+          },
           { "n", "y", "<cmd>lua require('diffview.actions').copy_hash()<cr>", { desc = "Copy hash" } },
           { "n", "L", "<cmd>lua require('diffview.actions').open_commit_log()<cr>", { desc = "Commit log" } },
           { "n", "zR", "<cmd>lua require('diffview.actions').open_all_folds()<cr>", { desc = "Expand all" } },
@@ -132,9 +157,19 @@ return {
           { "n", "<c-b>", "<cmd>lua require('diffview.actions').scroll_view(-0.25)<cr>", { desc = "Scroll up" } },
           { "n", "<c-f>", "<cmd>lua require('diffview.actions').scroll_view(0.25)<cr>", { desc = "Scroll down" } },
           { "n", "<tab>", "<cmd>lua require('diffview.actions').select_next_entry()<cr>", { desc = "Next entry" } },
-          { "n", "<s-tab>", "<cmd>lua require('diffview.actions').select_prev_entry()<cr>", { desc = "Previous entry" } },
+          {
+            "n",
+            "<s-tab>",
+            "<cmd>lua require('diffview.actions').select_prev_entry()<cr>",
+            { desc = "Previous entry" },
+          },
           { "n", "gf", "<cmd>lua require('diffview.actions').goto_file_edit()<cr>", { desc = "Open file" } },
-          { "n", "<C-w><C-f>", "<cmd>lua require('diffview.actions').goto_file_split()<cr>", { desc = "Open in split" } },
+          {
+            "n",
+            "<C-w><C-f>",
+            "<cmd>lua require('diffview.actions').goto_file_split()<cr>",
+            { desc = "Open in split" },
+          },
           { "n", "<C-w>gf", "<cmd>lua require('diffview.actions').goto_file_tab()<cr>", { desc = "Open in tab" } },
           { "n", "<leader>e", "<cmd>lua require('diffview.actions').focus_files()<cr>", { desc = "Focus files" } },
           { "n", "<leader>b", "<cmd>lua require('diffview.actions').toggle_files()<cr>", { desc = "Toggle files" } },
@@ -152,19 +187,15 @@ return {
   },
 
   -- Merge conflict markers
+  -- Conflict resolution is bound under `<leader>g` rather than the default
+  -- `co`/`ct`/`cb`/`c0`. `cb` in particular shadowed the native
+  -- "change backwards-word" operator-pending motion.
   {
     "akinsho/git-conflict.nvim",
     version = "*",
     event = "VeryLazy",
     opts = {
-      default_mappings = {
-        ours = "co",
-        theirs = "ct",
-        none = "c0",
-        both = "cb",
-        next = "]x",
-        prev = "[x",
-      },
+      default_mappings = false,
       default_commands = true,
       disable_diagnostics = true,
       list_opener = "copen",
@@ -172,6 +203,15 @@ return {
         incoming = "DiffAdd",
         current = "DiffText",
       },
+    },
+    keys = {
+      { "<leader>gxo", "<cmd>GitConflictChooseOurs<cr>", desc = "Conflict: choose ours" },
+      { "<leader>gxt", "<cmd>GitConflictChooseTheirs<cr>", desc = "Conflict: choose theirs" },
+      { "<leader>gxb", "<cmd>GitConflictChooseBoth<cr>", desc = "Conflict: choose both" },
+      { "<leader>gxn", "<cmd>GitConflictChooseNone<cr>", desc = "Conflict: choose none" },
+      { "<leader>gxl", "<cmd>GitConflictListQf<cr>", desc = "Conflict: list in quickfix" },
+      { "]x", "<cmd>GitConflictNextConflict<cr>", desc = "Next conflict" },
+      { "[x", "<cmd>GitConflictPrevConflict<cr>", desc = "Prev conflict" },
     },
   },
 }

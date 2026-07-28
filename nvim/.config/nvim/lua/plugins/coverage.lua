@@ -1,5 +1,8 @@
 return {
-  -- Test coverage visualization (reads pre-generated lcov reports)
+  -- Test coverage visualization.
+  --
+  -- Coverage is produced out-of-band (`just coverage` -> gcovr/lcov); this
+  -- plugin only renders the resulting report.
   {
     "andythigpen/nvim-coverage",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -12,76 +15,63 @@ return {
       "CoverageToggle",
       "CoverageSummary",
       "CoverageClear",
+      "CoverageWhere",
     },
+    -- stylua: ignore
     keys = {
-      { "<leader>tc", "<cmd>CoverageToggle<cr>", desc = "Toggle Coverage" },
-      { "<leader>tC", "<cmd>CoverageSummary<cr>", desc = "Coverage Summary" },
-      { "<leader>tl", "<cmd>CoverageLoad<cr>", desc = "Load Coverage" },
-      { "<leader>tL", function()
-          local file = vim.fn.input("Coverage file: ", "coverage.info", "file")
-          if file ~= "" then
-            vim.cmd("CoverageLoadLcov " .. file)
-          end
-        end, desc = "Load Coverage (custom file)" },
-      { "<leader>tx", "<cmd>CoverageClear<cr>", desc = "Clear Coverage" },
+      { "<leader>tc", "<cmd>CoverageToggle<cr>", desc = "Toggle coverage signs" },
+      { "<leader>tC", "<cmd>CoverageSummary<cr>", desc = "Coverage summary" },
+      { "<leader>tv", "<cmd>CoverageLoad<cr>", desc = "Load coverage report" },
+      { "<leader>tV", function()
+          local file = vim.fn.input("Coverage file: ", require("config.coverage").find() or "", "file")
+          if file ~= "" then vim.cmd("CoverageLoadLcov " .. vim.fn.fnameescape(file)) end
+        end, desc = "Load coverage (pick file)" },
+      { "<leader>tx", "<cmd>CoverageClear<cr>", desc = "Clear coverage" },
     },
     opts = {
       auto_reload = true,
-      -- C/C++ coverage via lcov
-      -- Configured in config() function below to dynamically find coverage file
       lang = {},
-      -- Sign column indicators
       signs = {
         covered = { hl = "CoverageCovered", text = "▎" },
         uncovered = { hl = "CoverageUncovered", text = "▎" },
         partial = { hl = "CoveragePartial", text = "▎" },
       },
-      -- Catppuccin-inspired colors
       highlights = {
-        covered = { fg = "#a6e3a1" },   -- Green
-        uncovered = { fg = "#f38ba8" }, -- Red
-        partial = { fg = "#f9e2af" },   -- Yellow
+        covered = { fg = "#a6e3a1" },
+        uncovered = { fg = "#f38ba8" },
+        partial = { fg = "#f9e2af" },
       },
-      -- Summary panel
       summary = {
-        min_coverage = 80.0, -- Highlight red if below this threshold
+        min_coverage = 80.0,
       },
-      -- Load coverage on entering buffer
       load_coverage_cb = function(ftype)
-        vim.notify("Loaded " .. ftype .. " coverage", vim.log.levels.INFO)
+        vim.notify("Loaded " .. ftype .. " coverage", vim.log.levels.INFO, { title = "coverage" })
       end,
     },
     config = function(_, opts)
-      -- Helper to find coverage file
-      local function find_coverage_file()
-        if vim.g.coverage_file and vim.fn.filereadable(vim.g.coverage_file) == 1 then
-          return vim.g.coverage_file
-        end
+      local coverage_file = require("config.coverage").find()
 
-        local cwd = vim.fn.getcwd()
-        local possible_locs = {
-          "builddir/meson-logs/coverage.info",
-          "_buildresults/meson-logs/coverage.info",
-          "build/meson-logs/coverage.info",
-          "meson-logs/coverage.info",
-          "coverage.info",
-        }
-
-        for _, loc in ipairs(possible_locs) do
-          if vim.fn.filereadable(cwd .. "/" .. loc) == 1 then
-            return loc
-          end
-        end
-        return "builddir/meson-logs/coverage.info" -- Default fallback
-      end
-
-      local coverage_file = find_coverage_file()
-
-      opts.lang = opts.lang or {}
-      opts.lang.cpp = { coverage_file = coverage_file }
-      opts.lang.c = { coverage_file = coverage_file }
+      opts.lang = vim.tbl_deep_extend("force", opts.lang or {}, {
+        c = { coverage_file = coverage_file },
+        cpp = { coverage_file = coverage_file },
+        python = {
+          coverage_file = ".coverage",
+          coverage_command = "coverage json --fail-under=0 -q -o -",
+        },
+        rust = {
+          coverage_command = "grcov . -s . --binary-path ./target/debug/ -t coveralls "
+            .. "--branch --ignore-not-existing -o -",
+        },
+      })
 
       require("coverage").setup(opts)
+
+      vim.api.nvim_create_user_command("CoverageWhere", function()
+        local found = require("config.coverage").find()
+        vim.notify(found and ("Using: " .. found) or "No coverage report found", vim.log.levels.INFO, {
+          title = "coverage",
+        })
+      end, { desc = "Show which coverage report would be loaded" })
     end,
   },
 }

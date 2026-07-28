@@ -5,9 +5,28 @@ return {
     build = false,
     cmd = "Spectre",
     keys = {
-      { "<leader>sP", function() require("spectre").open() end, desc = "Search & Replace (Project)" },
-      { "<leader>sP", function() require("spectre").open_visual({ select_word = true }) end, mode = "v", desc = "Search & Replace Selection (Project)" },
-      { "<leader>sB", function() require("spectre").open_file_search({ select_word = true }) end, desc = "Search & Replace (Buffer)" },
+      {
+        "<leader>sP",
+        function()
+          require("spectre").open()
+        end,
+        desc = "Search & Replace (Project)",
+      },
+      {
+        "<leader>sP",
+        function()
+          require("spectre").open_visual({ select_word = true })
+        end,
+        mode = "v",
+        desc = "Search & Replace Selection (Project)",
+      },
+      {
+        "<leader>sB",
+        function()
+          require("spectre").open_file_search({ select_word = true })
+        end,
+        desc = "Search & Replace (Buffer)",
+      },
     },
     opts = {
       open_cmd = "noswapfile vnew",
@@ -147,42 +166,45 @@ return {
   -- Docstring generator
   {
     "danymat/neogen",
-    dependencies = "nvim-treesitter/nvim-treesitter",
+    dependencies = { "nvim-treesitter/nvim-treesitter", "L3MON4D3/LuaSnip" },
     cmd = "Neogen",
     keys = {
-      { "<leader>cg", function() require("neogen").generate() end, desc = "Generate Docstring" },
+      {
+        "<leader>cg",
+        function()
+          require("neogen").generate()
+        end,
+        desc = "Generate docstring",
+      },
+      {
+        "<leader>cG",
+        function()
+          require("neogen").generate({ type = "file" })
+        end,
+        desc = "Generate file docstring",
+      },
     },
     opts = {
       enabled = true,
       languages = {
-        c = {
-          template = {
-            annotation_convention = "doxygen",
-          },
-        },
-        cpp = {
-          template = {
-            annotation_convention = "doxygen",
-          },
-        },
-        python = {
-          template = {
-            annotation_convention = "google_docstrings",
-          },
-        },
-        rust = {
-          template = {
-            annotation_convention = "rustdoc",
-          },
-        },
+        -- Doxygen matches the convention enforced by this project's
+        -- CODING_GUIDELINES.md and .clang-tidy.
+        c = { template = { annotation_convention = "doxygen" } },
+        cpp = { template = { annotation_convention = "doxygen" } },
+        python = { template = { annotation_convention = "google_docstrings" } },
+        rust = { template = { annotation_convention = "rustdoc" } },
+        lua = { template = { annotation_convention = "ldoc" } },
       },
       snippet_engine = "luasnip",
     },
   },
 
-  -- Snippet collection
-  {
-    "rafamadriz/friendly-snippets",
-    lazy = true,
-  },
+  -- NOTE: friendly-snippets is loaded via LuaSnip in plugins/completion.lua.
+  -- It used to be declared here as a bare `lazy = true` spec that nothing ever
+  -- required, so no snippet from it was ever available.
+
+  -- NOTE: direnv is handled synchronously in lua/config/env.lua, loaded from
+  -- init.lua before lazy.nvim. direnv.vim exported asynchronously on VimEnter,
+  -- which is too late: LSP servers are already spawned during BufReadPost when
+  -- opening a file from the command line.
 }
