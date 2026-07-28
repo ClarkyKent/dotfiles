@@ -164,3 +164,6 @@ export PATH=/home/quara/.opencode/bin:$PATH
 
 GITSTATUS_LOG_LEVEL=DEBUG
 autoload -U compinit; compinit
+export ZED_ALLOW_EMULATED_GPU=1
+alias zed="WAYLAND_DISPLAY= zed"
+export PATH=$PATH:~/bin
