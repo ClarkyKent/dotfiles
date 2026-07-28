@@ -1,3 +1,7 @@
 !/history.txt
 /nushell/.config/nushell/history.txt
 !/nushell/.config/nushell/history.txt
+
+# Local archives / scratch artefacts
+*.zip
+*.tar.gz
