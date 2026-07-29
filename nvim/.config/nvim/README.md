@@ -48,8 +48,7 @@ nvim/
 │   │   ├── options.lua
 │   │   ├── tasks.lua     # Overseer templates (just/meson/invoke/robot)
 │   │   ├── tsincremental.lua
-│   │   ├── util.lua
-│   │   └── verify-ai-keys.lua
+│   │   └── util.lua
 │   └── plugins/          # Plugins (Modular)
 │       ├── ai.lua        # Copilot, CodeCompanion (Claude/GPT/Gemini)
 │       ├── build.lua     # Overseer task runner
