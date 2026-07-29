@@ -5,7 +5,7 @@ A modular, feature-rich Neovim configuration focused on C/C++, Rust, and Python 
 ## Features
 
 - **Package Management**: [lazy.nvim](https://github.com/folke/lazy.nvim)
-- **UI**: [Catppuccin](https://github.com/catppuccin/nvim) theme, [Lualine](https://github.com/nvim-lualine/lualine.nvim), [Snacks.nvim](https://github.com/folke/snacks.nvim) (Dashboard, Notifications).
+- **UI**: [Kanagawa](https://github.com/rebelot/kanagawa.nvim) theme, [Lualine](https://github.com/nvim-lualine/lualine.nvim), [Snacks.nvim](https://github.com/folke/snacks.nvim) (Dashboard, Notifications).
 - **LSP**: Native LSP with [Mason](https://github.com/williamboman/mason.nvim) and [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig).
   - **C/C++**: `clangd` with `clangd_extensions.nvim` (AST, switching, etc.).
   - **Rust**: `rust-analyzer`.
@@ -39,15 +39,34 @@ nvim/
 ├── lua/
 │   ├── config/           # Core config
 │   │   ├── autocmds.lua
+│   │   ├── cortex.lua    # Cortex-M (SVD/registers/memory) helpers for DAP
+│   │   ├── coverage.lua  # Coverage report discovery
+│   │   ├── env.lua       # Synchronous direnv/devbox environment loading
+│   │   ├── format.lua    # Format-on-save toggles
+│   │   ├── icons.lua
 │   │   ├── keymaps.lua
-│   │   └── options.lua
+│   │   ├── options.lua
+│   │   ├── tasks.lua     # Overseer templates (just/meson/invoke/robot)
+│   │   ├── tsincremental.lua
+│   │   ├── util.lua
+│   │   └── verify-ai-keys.lua
 │   └── plugins/          # Plugins (Modular)
-│       ├── ai.lua        # Copilot, Claude
+│       ├── ai.lua        # Copilot, CodeCompanion (Claude/GPT/Gemini)
+│       ├── build.lua     # Overseer task runner
 │       ├── completion.lua# blink.cmp
-│       ├── editor.lua    # Fzf, Flash, Harpoon, Git
+│       ├── coverage.lua  # nvim-coverage
+│       ├── debug.lua     # nvim-dap (Cortex-M, host gdb, Python/Robot)
+│       ├── docs.lua      # Markdown preview/render
+│       ├── editor.lua    # Fzf, Flash, Harpoon, Git signs, Todo comments
 │       ├── formatting.lua# Conform
+│       ├── git.lua       # Diffview, git-conflict
 │       ├── linting.lua   # nvim-lint
 │       ├── lsp.lua       # LSP, Mason, Clangd
+│       ├── navigation.lua# Aerial outline, matchup, Glance peek
+│       ├── project.lua   # Sessions, project detection
+│       ├── sonarqube.lua # SonarLint
+│       ├── testing.lua   # Neotest (pytest, Rust)
+│       ├── tooling.lua   # Mason tool provisioning
 │       ├── treesitter.lua# Syntax Highlighting
 │       └── ui.lua        # Theme, Dashboard, Statusline, Terminal
 ```
